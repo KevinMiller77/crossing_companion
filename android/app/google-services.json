@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "608007090753",
+    "firebase_url": "https://crossingcompanion.firebaseio.com",
+    "project_id": "crossingcompanion",
+    "storage_bucket": "crossingcompanion.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:608007090753:android:f00355cb3f63f2454a4cc0",
+        "android_client_info": {
+          "package_name": "com.example.crossing_companion"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "608007090753-sbkn5dt6tric6d4u9940hhibci4g8pvu.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.crossing_companion",
+            "certificate_hash": "5f85c093ddc5de148a0a04a58dbf3f571386000a"
+          }
+        },
+        {
+          "client_id": "608007090753-oj8s2r9f7bhppal77utknhj7cse2frgk.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAb8xsDbtDYlmZxdJL8rLdzmVm4WKAax50"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "608007090753-oj8s2r9f7bhppal77utknhj7cse2frgk.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

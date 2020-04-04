@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'ui/home.dart';
+import 'ui/login.dart';
 
 void main() => runApp(CCAppMain());
 
@@ -8,13 +8,13 @@ class CCAppMain extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-
+      title: 'Crossing Companion',
       theme: ThemeData(
         primarySwatch: Colors.blueGrey,
       ),
       
-      home: CCHomePage(title: 'Flutter Demo Home Page'),
+      home: KevLoginPage(title: 'Login Page'),
+      
 
     );
   }
