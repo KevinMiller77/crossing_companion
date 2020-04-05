@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'ui/login.dart';
+import 'ui/root.dart';
 
 void main() => runApp(CCAppMain());
 
@@ -13,9 +13,8 @@ class CCAppMain extends StatelessWidget {
         primarySwatch: Colors.blueGrey,
       ),
       
-      home: KevLoginPage(title: 'Login Page'),
+      home: KevRootPage(auth: Auth(),),
       
-
     );
   }
 }

@@ -45,6 +45,7 @@ android {
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        multiDexEnabled true
     }
 
     buildTypes {
@@ -52,6 +53,10 @@ android {
             // TODO: Add your own signing config for the release build.
             // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig signingConfigs.debug
+            // minifyEnable true
+        }
+        debug {
+            // minifyEnable true
         }
     }
 }
@@ -61,6 +66,7 @@ flutter {
 }
 
 dependencies {
+    implementation 'com.android.support:multidex:1.0.3'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test:runner:1.1.1'
