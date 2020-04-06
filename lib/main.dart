@@ -1,8 +1,34 @@
 import 'package:flutter/material.dart';
-import 'ui/root.dart';
+import 'package:crossing_companion/ui/root.dart';
+import 'package:crossing_companion/web/web_landing_page.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'dart:io' show Platform;
 
-void main() => runApp(CCAppMain());
+void main() {
+  if (kIsWeb)
+  {
+    print("on web");
+    runApp(CCWebAppMain());
+  }
+  else
+  {
+    runApp(CCAppMain());
+  }
+}
+class CCWebAppMain extends StatelessWidget {
+  // This widget is the root of your application.
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Crossing Companion',
+      theme: ThemeData(
+        primarySwatch: Colors.blueGrey,
+      ),
 
+      home: WebLandingPage(),
+    );
+  }
+}
 class CCAppMain extends StatelessWidget {
   // This widget is the root of your application.
   @override
@@ -13,7 +39,7 @@ class CCAppMain extends StatelessWidget {
         primarySwatch: Colors.blueGrey,
       ),
       
-      home: KevRootPage(auth: Auth(),),
+      home: CCRootPage(auth: Auth(),),
       
     );
   }

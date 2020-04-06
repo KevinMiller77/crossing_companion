@@ -1,5 +1,4 @@
 import "package:flutter/material.dart";
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crossing_companion/ui/root.dart';
 
 class CCHomePage extends StatefulWidget {

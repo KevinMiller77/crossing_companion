@@ -1,4 +1,3 @@
-
 import 'package:crossing_companion/cc.dart';
 import 'package:crossing_companion/ui/home.dart';
 import 'package:flutter/material.dart';
@@ -12,23 +11,23 @@ enum AuthStatus
   LOGGED_IN
 }
 
-class KevRootPage extends StatefulWidget
+class CCRootPage extends StatefulWidget
 {
-  KevRootPage({this.auth});
+  CCRootPage({this.auth});
 
   final String title = "CC Root page";
   final BaseAuth auth;
 
   @override
   State<StatefulWidget> createState() {
-    return KevRootState();
+    return CCRootState();
   }
 }
 
-class KevRootState extends State<KevRootPage>
+class CCRootState extends State<CCRootPage>
 {
   
-  AuthStatus _authStatus = AuthStatus.NOT_LOGGED_IN;
+  AuthStatus _authStatus = AuthStatus.NOT_DETERMINED;
   String _user;
 
   @override
@@ -46,7 +45,7 @@ class KevRootState extends State<KevRootPage>
     });
   }
 
-  void LoginCallback()
+  void loginCallback()
   {
     widget.auth.getCurrentUser().then((user)
     {
@@ -59,9 +58,10 @@ class KevRootState extends State<KevRootPage>
       _authStatus = AuthStatus.LOGGED_IN; 
     });
     print("User logged in");
+    
   }
 
-  void LogoutCallback()
+  void logoutCallback()
   {
     setState(() {
       _authStatus = AuthStatus.NOT_LOGGED_IN;
@@ -72,19 +72,18 @@ class KevRootState extends State<KevRootPage>
 
   @override
   Widget build(BuildContext context) {
-    //TODO: Add a waiting page
     switch (_authStatus) {
       case AuthStatus.NOT_DETERMINED:
       case AuthStatus.NOT_LOGGED_IN:
-      return KevLoginPage(auth: widget.auth, loginCallback: LoginCallback);
+      return CCLoginPage(auth: widget.auth, loginCallback: loginCallback);
       break;
 
       case AuthStatus.LOGGED_IN:
-      return CCHomePage(auth: widget.auth, userID: _user, logoutCallback: LogoutCallback);
+      return CCHomePage(auth: widget.auth, userID: _user, logoutCallback: logoutCallback);
       break;
 
       default:
-      return KevLoginPage(auth: widget.auth, loginCallback: LoginCallback);
+      return CCLoginPage(auth: widget.auth, loginCallback: loginCallback);
       break;
     }  
   }
@@ -106,7 +105,7 @@ abstract class BaseAuth {
 
   Future<bool> isEmailVerified();
 
-  Future<void> resetPassword();
+  Future<void> resetPassword(String email);
 }
 
 class Auth implements BaseAuth {
@@ -152,9 +151,9 @@ class Auth implements BaseAuth {
     return user.isEmailVerified;
   }
 
-  Future<void> resetPassword() async {
-    FirebaseUser user = await _firebaseAuth.currentUser();
-    //TODO: Add in the reset password jiggle
+  
+  Future<void> resetPassword(String email) async {
+    _firebaseAuth.sendPasswordResetEmail(email: email);
   }
 
   Future<String> googleSignIn() async {

@@ -1,16 +1,17 @@
 import 'dart:async';
 import 'dart:developer';
 
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import 'package:crossing_companion/utils/kev_utils.dart';
 import 'root.dart';
 
-class KevLoginPage extends StatefulWidget
+class CCLoginPage extends StatefulWidget
 {
-  KevLoginPage({this.auth, this.loginCallback});
+  CCLoginPage({this.auth, this.loginCallback});
 
   final String title = "CC Login page";
   final Auth auth;
@@ -18,20 +19,30 @@ class KevLoginPage extends StatefulWidget
 
   @override
   State<StatefulWidget> createState() {
-    return KevLoginState();
+    return CCLoginState();
   }
 }
 
-class KevLoginState extends State<KevLoginPage> with TickerProviderStateMixin
+class CCLoginState extends State<CCLoginPage> with TickerProviderStateMixin
 {
   final databaseReference = Firestore.instance;
   
 
   String email = "";
   String password = "";
-  String passConf = "";
+  String passVerf = "";
   String username = "";
   bool signingUp;
+
+  FocusNode emailFocus = FocusNode();
+  FocusNode passwordFocus = FocusNode();
+  FocusNode passVerfFocus = FocusNode();
+  FocusNode usernameFocus = FocusNode();
+
+  final GlobalKey<FormFieldState> _userKey = GlobalKey<FormFieldState>();
+  final GlobalKey<FormFieldState> _emailKey = GlobalKey<FormFieldState>();
+  final GlobalKey<FormFieldState> _passKey = GlobalKey<FormFieldState>();
+  final GlobalKey<FormFieldState> _passVerfKey = GlobalKey<FormFieldState>();
 
   bool keyboardVisable = false;
   bool creatingAccount = false;
@@ -61,38 +72,9 @@ class KevLoginState extends State<KevLoginPage> with TickerProviderStateMixin
     return null;
   }
 
-  final GlobalKey<FormFieldState> _userKey = GlobalKey<FormFieldState>();
-  final GlobalKey<FormFieldState> _emailKey = GlobalKey<FormFieldState>();
-  final GlobalKey<FormFieldState> _passKey = GlobalKey<FormFieldState>();
-  final GlobalKey<FormFieldState> _passConfKey = GlobalKey<FormFieldState>();
 
 
-  static int swatchColorHex = 0xFFD7AA73;
-
-  static Map<int, Color> color =
-  {
-  50:Color.fromRGBO (200,141,50, .1),
-  100:Color.fromRGBO(200,141,50, .2),
-  200:Color.fromRGBO(200,141,50, .3),
-  300:Color.fromRGBO(200,141,50, .4),
-  400:Color.fromRGBO(200,141,50, .5),
-  500:Color.fromRGBO(200,141,50, .6),
-  600:Color.fromRGBO(200,141,50, .7),
-  700:Color.fromRGBO(200,141,50, .8),
-  800:Color.fromRGBO(200,141,50, .9),
-  900:Color.fromRGBO(200,141,50, 1),
-  };
-
-  MaterialColor swatchColor = MaterialColor(swatchColorHex, color);
-
-  Unfocus<bool>(val)
-  {
-    FocusScopeNode currentFocus = FocusScope.of(context);
-
-    if (!currentFocus.hasPrimaryFocus) {
-      currentFocus.unfocus();
-    }
-  }
+  MaterialColor swatchColor = KevColor.getMatColor(0xFFD7AA73);
 
   @override void initState() {
     signingUp = false;
@@ -101,8 +83,11 @@ class KevLoginState extends State<KevLoginPage> with TickerProviderStateMixin
           keyboardVisable = visible;
           if (!keyboardVisable)
           {
-            print("Keyboard gone");
-            Unfocus(false);
+            FocusScopeNode currentFocus = FocusScope.of(context);
+
+            if (!currentFocus.hasPrimaryFocus) {
+              currentFocus.unfocus();
+            }
           }
           else
           {
@@ -110,7 +95,18 @@ class KevLoginState extends State<KevLoginPage> with TickerProviderStateMixin
           }
       },
     );
+    
     super.initState();
+  }
+
+  @override
+  void dispose()
+  {
+    super.dispose();
+    emailFocus.dispose();
+    passwordFocus.dispose();
+    passVerfFocus.dispose();
+    usernameFocus.dispose();
   }
 
   @override
@@ -136,7 +132,7 @@ class KevLoginState extends State<KevLoginPage> with TickerProviderStateMixin
                   children: <Widget>[
                     Container(padding: EdgeInsets.only(top: statusBarHeight),),
                     Padding(
-                      padding: const EdgeInsets.fromLTRB(0.0, 12.0, 0.0, 0.0),
+                      padding: const EdgeInsets.fromLTRB(0.0, 12.0, 0.0, 12.0),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: <Widget>[
@@ -157,17 +153,18 @@ class KevLoginState extends State<KevLoginPage> with TickerProviderStateMixin
                       padding: EdgeInsets.fromLTRB(30, 0, 30, 20),
                     ),
                     AnimatedContainer(
-                      duration: Duration(milliseconds: 750),
+                      duration: Duration(milliseconds: 500),
                       padding: EdgeInsets.only(top: buttonPad),
                       child: Container(
                         child: Column (crossAxisAlignment: CrossAxisAlignment.center, children: <Widget>[
                           
                           Padding(
-                          padding: const EdgeInsets.fromLTRB(24, 0, 24, 32),
+                          padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
                           child: TextFormField(
                             key: _emailKey,
+                            focusNode: emailFocus,
                             decoration: InputDecoration(
-                              labelText: "Enter Email",
+                              labelText: " Email",
                               labelStyle: TextStyle(
                                 color: Colors.white38,
                               ),
@@ -184,6 +181,11 @@ class KevLoginState extends State<KevLoginPage> with TickerProviderStateMixin
                                 borderSide: BorderSide(color: swatchColor),
                               ),
                             ),
+                            textInputAction: TextInputAction.next,
+                            onFieldSubmitted: (String fieldData) {
+                              print("Email: " + fieldData);
+                              _fieldFocusChange(context, usernameFocus, passwordFocus);
+                            },
                             validator: (val)
                             {
                               if (val.length == 0)
@@ -201,12 +203,12 @@ class KevLoginState extends State<KevLoginPage> with TickerProviderStateMixin
                             ),
                           ),
                         Padding(
-                          padding: const EdgeInsets.fromLTRB(24, 0, 24, 32),
+                          padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
                           child: TextFormField(
                             key: _passKey,
-                            onFieldSubmitted: Unfocus,
+                            focusNode: passwordFocus,
                             decoration: InputDecoration(
-                              labelText: "Enter Password",
+                              labelText: " Password",
                               labelStyle: TextStyle(
                                 color: Colors.white38,
                               ),
@@ -223,7 +225,19 @@ class KevLoginState extends State<KevLoginPage> with TickerProviderStateMixin
                                 borderSide: BorderSide(color: swatchColor),
                               ),
                               
-                            ),
+                              ),
+                            textInputAction: TextInputAction.next,
+                            onFieldSubmitted: (String fieldData) {
+                              if (creatingAccount)
+                              {
+                                _fieldFocusChange(context, passwordFocus, passVerfFocus);
+                              }
+                              else
+                              {
+                                _fieldFocusChange(context, passwordFocus, null);
+                                _login();
+                              }
+                            },
                             validator: (val)
                             {
                               if (val.length == 0)
@@ -241,6 +255,7 @@ class KevLoginState extends State<KevLoginPage> with TickerProviderStateMixin
                               color: swatchColor,
                               fontSize: 32,
                             ),
+                            
                           ),
                         ),
                         
@@ -255,11 +270,11 @@ class KevLoginState extends State<KevLoginPage> with TickerProviderStateMixin
                               padding: EdgeInsets.fromLTRB(24, 0, 24, 0),
                               child: Column(children: <Widget>[
                                 TextFormField(
-                                key: _passConfKey,
+                                focusNode: passVerfFocus,
+                                key: _passVerfKey,
                                 obscureText: true,
-                                onFieldSubmitted: Unfocus,
                                 decoration: InputDecoration(
-                                  labelText: "Re-enter Password",
+                                  labelText: "Verify Password",
                                   labelStyle: TextStyle(
                                     color: Colors.white38,
                                   ),
@@ -277,6 +292,13 @@ class KevLoginState extends State<KevLoginPage> with TickerProviderStateMixin
                                   ),
                                   
                                 ),
+                                textInputAction: TextInputAction.next,
+                                onFieldSubmitted: (String fieldData) {
+                                  if (creatingAccount)
+                                  {
+                                    _fieldFocusChange(context, passVerfFocus, usernameFocus);
+                                  }
+                                },
                                 validator: (val)
                                 {
                                   if (val.length == 0 && creatingAccount)
@@ -297,12 +319,12 @@ class KevLoginState extends State<KevLoginPage> with TickerProviderStateMixin
                                   fontSize: 32,
                                 ),
                               ),
-                              Padding(padding: EdgeInsets.only(bottom: 32),),
+                              Padding(padding: EdgeInsets.only(top: 16,)),
                                 TextFormField(
+                                focusNode: usernameFocus,
                                 key: _userKey,
-                                onFieldSubmitted: Unfocus,
                                 decoration: InputDecoration(
-                                  labelText: "Enter Username",
+                                  labelText: " Username",
                                   labelStyle: TextStyle(
                                     color: Colors.white38,
                                   ),
@@ -320,6 +342,14 @@ class KevLoginState extends State<KevLoginPage> with TickerProviderStateMixin
                                   ),
                                   
                                 ),
+                                textInputAction: TextInputAction.next,
+                                onFieldSubmitted: (String fieldData) {
+                                  if (creatingAccount)
+                                  {
+                                    _createAccount();
+                                  }
+                                  _fieldFocusChange(context, usernameFocus, null);
+                                },
                                 validator: (val)
                                 {
                                   if (val.length == 0 && creatingAccount)
@@ -346,7 +376,6 @@ class KevLoginState extends State<KevLoginPage> with TickerProviderStateMixin
                   ),
                 ),
                     ),
-                    Spacer(flex: 1),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
@@ -361,26 +390,7 @@ class KevLoginState extends State<KevLoginPage> with TickerProviderStateMixin
                           child: Text("Create an account", style: TextStyle(color: Colors.black54, fontSize: 18),), 
                           onPressed: () 
                           {
-                            if (creatingAccount){
-                            //TODO: Go to another screen, the creation screen
-                              if (_emailKey.currentState.validate() && _passKey.currentState.validate() && _passConfKey.currentState.validate() && _userKey.currentState.validate())
-                              {
-                                signingUp = true;
-                                SubmitCreds();   
-
-                              }
-                            }
-                            else
-                            {
-                              setState(() {
-                                if (!errorPopupVisible)
-                                {
-                                  buttonPad = creatingAccount ? 60 : 0;
-                                  userButtonHeight = 206;
-                                  creatingAccount = true;
-                                }
-                              });
-                            }
+                            _createAccount();
                           },
                         ),
                         Spacer(),
@@ -394,21 +404,15 @@ class KevLoginState extends State<KevLoginPage> with TickerProviderStateMixin
                           child: Text("Log in with email", style: TextStyle(color: Colors.black54, fontSize: 18),), 
                           onPressed: () 
                           {
-                            //TODO: Go to another screen, the creation screen
-                            if (_emailKey.currentState.validate() && _passKey.currentState.validate())
-                            {
-                                print("Login");
-                                signingUp = false;
-                                SubmitCreds();
-                            }
+                            _login();
                           },
                         ),
                         Spacer(flex: 2),
                       ],
                     ),
                     Spacer(flex: 2),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(120, 0, 120, 0),
+                    Container(
+                      width: 240,
                       child: Container(
                         constraints: BoxConstraints(
                           maxHeight: 70,
@@ -435,7 +439,6 @@ class KevLoginState extends State<KevLoginPage> with TickerProviderStateMixin
                             ],
                           ), onPressed: () 
                           {
-                            //TODO: Firebase google signin
                             widget.auth.googleSignIn().whenComplete(()
                               {
                                 log("Signed in with google\n");
@@ -453,9 +456,13 @@ class KevLoginState extends State<KevLoginPage> with TickerProviderStateMixin
                           {
                             if (_emailKey.currentState.validate())
                             {
-                              FirebaseUser user = await widget.auth.getCurrentUser();
+                              widget.auth.resetPassword(email);
+                              errorText = "You have been sent a password reset email\nif you have an account";
+                              setState(() {
+                                errorPopupVisible = true;
+                              });
+                              startPopupTimer();
                             }
-                            //TODO: Go to another screen, Forgot password
                             
                           },
                         ),
@@ -471,10 +478,11 @@ class KevLoginState extends State<KevLoginPage> with TickerProviderStateMixin
                       Spacer(flex: 2),
                       Container(
                         child: AnimatedContainer(
+
                           duration: Duration(seconds: 1),
-                          height: errorPopupVisible ? 100 : 80,
+                          height: errorPopupVisible ? 100 : 50,
                           child: AnimatedOpacity(
-                            duration: Duration(milliseconds: 750),
+                            duration: Duration(milliseconds: 1000),
                             opacity: errorPopupVisible ? 1.0 : 0.0,
                             child: RaisedButton(
                               textTheme: ButtonTextTheme.normal,
@@ -486,7 +494,7 @@ class KevLoginState extends State<KevLoginPage> with TickerProviderStateMixin
 
                             child: Column(
                               children: <Widget>[
-                                Spacer(flex: 2),
+                                Spacer(),
                                 Icon(
                                   Icons.info,
                                   color: swatchColor,
@@ -494,7 +502,7 @@ class KevLoginState extends State<KevLoginPage> with TickerProviderStateMixin
                                   semanticLabel: "Error",
                                 ),
                                 Spacer(),
-                                Text(errorText, style: TextStyle(color: Colors.white60, fontSize: 18),), 
+                                Text(errorText, style: TextStyle(color: Colors.white60, fontSize: 18), textAlign: TextAlign.center,), 
                                 Spacer(flex: 2),
                               ],
                             ),
@@ -518,46 +526,71 @@ class KevLoginState extends State<KevLoginPage> with TickerProviderStateMixin
     );
   }
 
-    String _errorMessage;
-    bool _isLoading;
-
-    void SubmitCreds() async {
-    String userId = "";
-    try {
-      if (!signingUp) {
-        userId = await widget.auth.signIn(email.trim(), password);
-        print('Signed in: $userId');
-      } else {
-        userId = await widget.auth.signUp(email.trim(), password);
-
-        print('Signed up user: $userId');
-
-        // Map<String, dynamic> userInfo = Map<String, dynamic>();
-        Firestore.instance.collection('userinfo').document(userId)
-            .setData({"Username": username, "Email": email});
-
-        userId = await widget.auth.signIn(email.trim(), password);
-
-        errorText = "You account has been created!";
-        setState(() {
-          errorPopupVisible = true;
-          
-          _passConfKey.currentState.reset();
-          _userKey.currentState.reset();
-          buttonPad = 60;
-          userButtonHeight = 0;
-          creatingAccount = false;
-        });
-        startPopupTimer();
+  void _createAccount()
+  {
+    if (creatingAccount){
+      if (_emailKey.currentState.validate() && _passKey.currentState.validate() && _passVerfKey.currentState.validate() && _userKey.currentState.validate())
+      {
+        signingUp = true;
+        submitFirebaseCredentials();   
       }
+    }
+    else
+    {
       setState(() {
-        _isLoading = false;
-        creatingAccount = creatingAccount;
+        if (!errorPopupVisible)
+        {
+          buttonPad = creatingAccount ? 60 : 0;
+          userButtonHeight = 206;
+          creatingAccount = true;
+        }
       });
+    }
+  }
 
-      if (userId.length > 0 && userId != null && !signingUp) {
-        widget.loginCallback();
-      }
+  void _login()
+  {
+    if (_emailKey.currentState.validate() && _passKey.currentState.validate())
+    {
+        signingUp = false;
+        submitFirebaseCredentials();
+    }
+  }
+
+
+  void submitFirebaseCredentials() async {
+  String userId = "";
+  try {
+    if (!signingUp) {
+      userId = await widget.auth.signIn(email.trim(), password);
+      print('Signed in: $userId');
+    } else {
+      userId = await widget.auth.signUp(email.trim(), password);
+
+      print('Signed up user: $userId');
+
+      // Map<String, dynamic> userInfo = Map<String, dynamic>();
+      Firestore.instance.collection('userinfo').document(userId)
+          .setData({"Username": username, "Email": email});
+
+      userId = await widget.auth.signIn(email.trim(), password);
+
+      errorText = "You account has been created!";
+      setState(() {
+        errorPopupVisible = true;
+        
+        _passVerfKey.currentState.reset();
+        _userKey.currentState.reset();
+        buttonPad = 60;
+        userButtonHeight = 0;
+        creatingAccount = false;
+      });
+      startPopupTimer();
+    }
+
+    if (userId.length > 0 && userId != null && !signingUp) {
+      widget.loginCallback();
+    }
     } catch (e) {
       print('Error: $e');
       if(e.code == 'ERROR_EMAIL_ALREADY_IN_USE') {
@@ -572,7 +605,9 @@ class KevLoginState extends State<KevLoginPage> with TickerProviderStateMixin
       {
         errorText = "You do not have an account! Please create one.";
         setState(() {
+          creatingAccount = false;
           errorPopupVisible = true;
+          _createAccount();
         });
         startPopupTimer();
       }
@@ -592,6 +627,14 @@ class KevLoginState extends State<KevLoginPage> with TickerProviderStateMixin
         });
         startPopupTimer();
       }
+      else if (e.code == "ERROR_TOO_MANY_REQUESTS")
+      {
+        errorText = "Too many requests!";
+        setState(() {
+          errorPopupVisible = true;
+        });
+        startPopupTimer();
+      }
       else if (e.code != null)
       {
         errorText = "Unknown login error!";
@@ -602,9 +645,7 @@ class KevLoginState extends State<KevLoginPage> with TickerProviderStateMixin
       }
 
       setState(() {
-        _isLoading = false;
-        _errorMessage = e.message;
-        _passConfKey.currentState.reset();
+        _passVerfKey.currentState.reset();
         _userKey.currentState.reset();
         
         // _emailKey.currentState.reset();
@@ -614,5 +655,10 @@ class KevLoginState extends State<KevLoginPage> with TickerProviderStateMixin
         creatingAccount = false;
       });
     }
+  }
+
+  _fieldFocusChange(BuildContext context, FocusNode currentFocus,FocusNode nextFocus) {
+    currentFocus.unfocus();
+    FocusScope.of(context).requestFocus(nextFocus);  
   }
 }
