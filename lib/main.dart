@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:crossing_companion/ui/root.dart';
 import 'package:crossing_companion/web/web_landing_page.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'dart:io' show Platform;
 
 void main() {
   if (kIsWeb)
