@@ -247,6 +247,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.4.0"
+  platform_detect:
+    dependency: "direct main"
+    description:
+      name: platform_detect
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.4.0"
   plugin_platform_interface:
     dependency: transitive
     description:
@@ -254,6 +261,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.0.2"
+  pub_semver:
+    dependency: transitive
+    description:
+      name: pub_semver
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.4.4"
   quiver:
     dependency: transitive
     description:
