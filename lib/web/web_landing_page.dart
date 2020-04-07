@@ -469,7 +469,7 @@ class ViewingOnWebBody extends StatelessWidget
                                             ),
                                             InkWell(
                                               child: Text("Terms & Conditions (link)", style: TextStyle(fontSize: 12, color: Colors.white, fontStyle: FontStyle.italic),),
-                                              onTap: () => { launch("https://app.termly.io/document/privacy-policy/f0044ebc-16b2-42ae-a7af-cdc7eb3cb24e")},
+                                              onTap: () => { launch("https://app.termly.io/document/terms-of-use-for-website/61eaa3cd-ce2d-41f5-8ff3-900e97ada432")},
                                             ),
                                           ],
                                           ),
