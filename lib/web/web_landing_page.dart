@@ -454,6 +454,27 @@ class ViewingOnWebBody extends StatelessWidget
                                   Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: <Widget>[
+                                      Container(
+                                        child: Column(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          crossAxisAlignment: CrossAxisAlignment.center,
+                                          children: <Widget>[
+                                            InkWell(
+                                              child: Text("Cookie Policy(link)", style: TextStyle(fontSize: 12, color: Colors.white, fontStyle: FontStyle.italic),),
+                                              onTap: () => { launch("https://app.termly.io/document/cookie-policy/be3fb851-7620-4c9d-9c60-4752281ea432")},
+                                            ),
+                                            InkWell(
+                                              child: Text("Privacy Policy (link)", style: TextStyle(fontSize: 12, color: Colors.white, fontStyle: FontStyle.italic),),
+                                              onTap: () => { launch("https://app.termly.io/document/privacy-policy/f0044ebc-16b2-42ae-a7af-cdc7eb3cb24e")},
+                                            ),
+                                            InkWell(
+                                              child: Text("Terms & Conditions (link)", style: TextStyle(fontSize: 12, color: Colors.white, fontStyle: FontStyle.italic),),
+                                              onTap: () => { launch("https://app.termly.io/document/privacy-policy/f0044ebc-16b2-42ae-a7af-cdc7eb3cb24e")},
+                                            ),
+                                          ],
+                                          ),
+                                      ),
+                                      Spacer(flex: 2),
                                       Column(
                                         mainAxisAlignment: MainAxisAlignment.center,
                                         crossAxisAlignment: CrossAxisAlignment.center,
@@ -466,6 +487,7 @@ class ViewingOnWebBody extends StatelessWidget
                                           ),
                                         ],
                                       ),
+                                      Spacer(flex: 3),
                                     ],
                                   ),
                                 ],
