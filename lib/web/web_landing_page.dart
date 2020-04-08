@@ -59,7 +59,7 @@ class FutureFeaturesListView extends StatelessWidget
   FutureFeaturesListView({this.height});
 
   double height;
-  double featureMaxHeight = 120;
+  double featureMaxHeight = 132;
   double paddingAllSides = 16;
   int numTiles = 0;
   int maxNumTiles = 0;
@@ -91,8 +91,8 @@ class FutureFeaturesListView extends StatelessWidget
               height: featureMaxHeight,
               child: ListTile(
                 title: Text("* " + document["Name"], maxLines: 3, textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold, fontStyle: FontStyle.italic, fontSize: 22, color: Colors.white60),),
-                subtitle: Text(document["Description"], textAlign: TextAlign.center, style: TextStyle(color: Colors.white60,fontSize: 20)),
-                contentPadding: EdgeInsets.only(bottom: 48),
+                subtitle: Text(document["Description"], maxLines: 3, textAlign: TextAlign.center, style: TextStyle(color: Colors.white60,fontSize: 20)),
+                contentPadding: EdgeInsets.only(bottom: 60),
               ),
             );
           }).toList(),
@@ -145,7 +145,7 @@ class ViewingOnWebBody extends StatelessWidget
 
     // double bannerSize = screenHeight / 8 >= headerTextSize ? screenHeight / 8 : headerTextSize;
 
-    double footerSize = screenHeight >= 500 ? 60 : 0;
+    double footerSize = 40;
     double bodySize = screenHeight - footerSize;
 
     double featuresHeight = 0;
@@ -256,7 +256,7 @@ class ViewingOnWebBody extends StatelessWidget
                                                   Padding(padding: EdgeInsets.only(top: 25),),
                                                   // Padding(padding: EdgeInsets.all(16.0),),
                                                   ConstrainedBox(
-                                                    constraints: BoxConstraints(maxWidth: screenWidth, maxHeight: 1600),
+                                                    constraints: BoxConstraints(maxWidth: screenWidth, maxHeight: 1650),
                                                     child: Column(
                                                       children: <Widget>[
                                                           Container(
@@ -282,8 +282,8 @@ class ViewingOnWebBody extends StatelessWidget
                                                                   AnimatedContainer(duration: Duration(milliseconds: 150), child: ConstrainedBox(constraints: BoxConstraints(maxWidth: screenWidth > 600 ? (screenWidth > 1400 ? screenWidth / 2 : screenWidth / 2) : screenWidth/2, maxHeight: 1500), child: features)),
                                                                   AnimatedContainer(
                                                                     duration: Duration(milliseconds: 150),
-                                                                    height: 500,
-                                                                    width: screenWidth > 600 ? 500 : 400,
+                                                                    height: screenWidth > 410 ? (screenWidth > 600 ? (screenWidth > 1400 ? 650 : 600) : 550) : 500,
+                                                                    width: screenWidth > 410 ? (screenWidth > 600 ? (screenWidth > 1400 ? 700 : 600) : 400) : 350,
                                                                     child: Column(
                                                                       crossAxisAlignment: CrossAxisAlignment.start,
                                                                       children: [
@@ -327,7 +327,7 @@ class ViewingOnWebBody extends StatelessWidget
                                                                         ),
                                                                         Spacer(),
                                                                         Container(
-                                                                          height: 200,
+                                                                          height: screenWidth > 410 ? (screenWidth > 600 ? (screenWidth > 1400 ? 350 : 300) : 250) : 200,
                                                                           child: TextFormField(
                                                                             maxLines: 20,
                                                                             key: _boxKey,
@@ -453,41 +453,23 @@ class ViewingOnWebBody extends StatelessWidget
                       duration: Duration(milliseconds: 150),
                       child: Container(
                         height: footerSize,
-                        color: Colors.black87,
                         child: Stack(
                           children: <Widget>[
+                            //Contains top row
                             Container(
-                              height: footerSize,
-                              width: MediaQuery.of(context).size.width,
-                              child: Image(
-                                image: AssetImage("assets/images/WebBackdrop.jfif"),
-                                color: Colors.black38,
-                                fit:BoxFit.fitWidth,
-                                colorBlendMode: BlendMode.darken,
-                              ),
-                            ),
-                              //Contains top row
-                            Container(
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  end: Alignment.bottomCenter,
-                                  begin: Alignment.topCenter,
-                                  colors: [Colors.black26, Colors.black87]
-                                )
-                              ),
+                              color: Colors.grey,
                               height: footerSize,
                               width: MediaQuery.of(context).size.width,
                               child: Column(
-                                children: <Widget>[
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
+                                mainAxisAlignment: MainAxisAlignment.center,
                                     children: <Widget>[
                                       Container(
                                         height: footerSize,
-                                        child: Column(
+                                        child: Row(
+                                          crossAxisAlignment: CrossAxisAlignment.center,
                                           mainAxisAlignment: MainAxisAlignment.center,
                                           children: <Widget>[
-                                            Spacer(),
+                                            Spacer(flex: 3),
                                             InkWell(
                                               child: Text("Cookie Policy(link)", style: TextStyle(fontSize: 12, color: Colors.white, fontStyle: FontStyle.italic),),
                                               onTap: () => { launch("https://app.termly.io/document/cookie-policy/be3fb851-7620-4c9d-9c60-4752281ea432")},
@@ -502,12 +484,11 @@ class ViewingOnWebBody extends StatelessWidget
                                               child: Text("Terms & Conditions (link)", style: TextStyle(fontSize: 12, color: Colors.white, fontStyle: FontStyle.italic),),
                                               onTap: () => { launch("https://app.termly.io/document/terms-of-use-for-website/61eaa3cd-ce2d-41f5-8ff3-900e97ada432")},
                                             ),
+                                            Spacer(flex: 3),
                                           ],
                                           ),
                                       ),
                                     ],
-                                  ),
-                                ],
                               ),
                             ),
                           ],
