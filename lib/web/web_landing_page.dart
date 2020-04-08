@@ -1,4 +1,4 @@
-import 'dart:html';
+// import 'dart:html';
 
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart'; 
@@ -139,18 +139,19 @@ class ViewingOnWebBody extends StatelessWidget
     double screenWidth = MediaQuery.of(context).size.width;
     double screenHeight = MediaQuery.of(context).size.height;
 
-    double headerSize = screenWidth > 600 ? (screenWidth > 1400 ? 105 : 95) : 75;
-    if (screenWidth < headerSize)
-    {
-      headerSize = screenWidth;
-    }
+    double headerSize = 75;
+
+    double leftHeaderPadding = screenWidth / 20;
+
     // double bannerSize = screenHeight / 8 >= headerTextSize ? screenHeight / 8 : headerTextSize;
 
     double footerSize = screenHeight >= 500 ? 60 : 0;
-    double bodySize = screenHeight - headerSize - footerSize;
+    double bodySize = screenHeight - footerSize;
 
     double featuresHeight = 0;
     FutureFeaturesListView features = FutureFeaturesListView(height: featuresHeight);
+
+    Color black68 = Colors.black54;
 
     return Container(
       width: MediaQuery.of(context).size.width,
@@ -164,50 +165,6 @@ class ViewingOnWebBody extends StatelessWidget
               children: <Widget>[
                 Column(
                   children: <Widget>[
-                    Stack(
-                      children: <Widget>[
-                        Container(
-                          height: headerSize,
-                          width: MediaQuery.of(context).size.width,
-                          child: Image(
-                            image: AssetImage("assets/images/WebBackdrop.jfif"),
-                            color: Colors.black38,
-                            fit:BoxFit.fitWidth,
-                            colorBlendMode: BlendMode.darken,
-                          ),
-                        ),
-                          //Contains top row
-                        Container(
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.bottomCenter,
-                              end: Alignment.topCenter,
-                              colors: [Colors.black26, Colors.black54]
-                            )
-                          ),
-                          height: headerSize,
-                          width: MediaQuery.of(context).size.width,
-                          child: Column(
-                            children: <Widget>[
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.center, 
-                                children: <Widget>[
-                                  Spacer(),
-                                  Container(height: 75, child: Image(image: AssetImage("assets/images/CCLogo.png"),fit: BoxFit.fitHeight)),
-                                  Spacer(flex: 3),
-                                  AnimatedDefaultTextStyle(
-                                    child: Text("Welcome to the Crossing Companion\napp info page!", textAlign: TextAlign.center), 
-                                    style: TextStyle(color: swatch, fontFamily: "Calibri",fontSize: screenWidth > 410 ? (screenWidth > 600 ? (screenWidth > 1400 ? 42 : 34) : 22) : 12), 
-                                    duration: Duration(milliseconds: 150)
-                                  ),
-                                  Spacer(flex: 5),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
                     //Body
                     Container(
                       child: Stack(
@@ -218,13 +175,12 @@ class ViewingOnWebBody extends StatelessWidget
                             width: MediaQuery.of(context).size.width,
                             child: Image(
                               image: AssetImage("assets/images/BodyBackdrop.jpg"),
-                              color: Colors.black38,
                               fit:BoxFit.fill,
                               colorBlendMode: BlendMode.darken,
                             ),
                           ),
                           Container(
-                            color: Colors.black54,
+                            color: black68,
                             height: bodySize,
                             width: MediaQuery.of(context).size.width,
                             child: Container(
@@ -232,9 +188,57 @@ class ViewingOnWebBody extends StatelessWidget
                                 children: <Widget>[
                                   SingleChildScrollView(
                                     child: Column(
-                                      mainAxisAlignment: MainAxisAlignment.center,
                                       children: <Widget>[
-                                        Padding(padding: EdgeInsets.only(top: 30)),
+                                        Stack(
+                                        children: <Widget>[
+                                          Container(
+                                            height: headerSize,
+                                            width: screenWidth,
+                                            child: Row(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              crossAxisAlignment: CrossAxisAlignment.center,
+                                              children: <Widget>[
+                                                AnimatedDefaultTextStyle(
+                                                                  child: Text("Crossing Companion", textAlign: TextAlign.center), 
+                                                                  style: TextStyle(color: swatch, fontWeight: FontWeight.bold, fontFamily: "Fink",fontSize: screenWidth > 410 ? (screenWidth > 600 ? (screenWidth > 1400 ? 42 : 34) : 22) : 12), 
+                                                                  duration: Duration(milliseconds: 150)
+                                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                            //Contains top row
+                                          Container(
+                                            decoration: BoxDecoration(
+                                              gradient: LinearGradient(
+                                                begin: Alignment.bottomCenter,
+                                                end: Alignment.topCenter,
+                                                colors: [Colors.transparent, black68]
+                                              )
+                                            ),
+                                            height: 75,
+                                            width: MediaQuery.of(context).size.width,
+                                            child: Column(
+                                              children: <Widget>[
+                                                Row(
+                                                  crossAxisAlignment: CrossAxisAlignment.center, 
+                                                  children: <Widget>[
+                                                    Padding(padding: EdgeInsets.only(right: leftHeaderPadding,)),
+                                                    Container(height: 75, width: 75, child: Image(image: AssetImage("assets/images/CCLogo.png"),fit: BoxFit.fitHeight)),
+                                                    
+                                                  ],
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      Padding(padding: EdgeInsets.only(top: 50)),
+                                        AnimatedDefaultTextStyle(
+                                                      child: Text("App info page!", style: TextStyle( decoration: TextDecoration.underline), textAlign: TextAlign.center), 
+                                                                  style: TextStyle(color: swatch, fontWeight: FontWeight.bold, fontFamily: "Fink",fontSize: screenWidth > 410 ? (screenWidth > 600 ? (screenWidth > 1400 ? 42 : 34) : 22) : 16), 
+                                                                  duration: Duration(milliseconds: 150)
+                                                    ),
+                                        Padding(padding: EdgeInsets.only(top: 75)),
                                         Row(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
                                             AnimatedDefaultTextStyle(
                                               child: Text("The app is still currently in development!\nHopefully we'll be launching within the next few weeks!", textAlign: TextAlign.center), 
@@ -275,10 +279,11 @@ class ViewingOnWebBody extends StatelessWidget
                                                                     ]),
                                                                   ),
                                                                   // features,                                                         //TODO: TAKE OUT MINUS 236
-                                                                  AnimatedContainer(duration: Duration(milliseconds: 150), child: ConstrainedBox(constraints: BoxConstraints(maxWidth: screenWidth > 600 ? (screenWidth > 1400 ? screenWidth / 2 : screenWidth / 2) : screenWidth, maxHeight: 1500), child: features)),
-                                                                  Container(
+                                                                  AnimatedContainer(duration: Duration(milliseconds: 150), child: ConstrainedBox(constraints: BoxConstraints(maxWidth: screenWidth > 600 ? (screenWidth > 1400 ? screenWidth / 2 : screenWidth / 2) : screenWidth/2, maxHeight: 1500), child: features)),
+                                                                  AnimatedContainer(
+                                                                    duration: Duration(milliseconds: 150),
                                                                     height: 500,
-                                                                    width: 500,
+                                                                    width: screenWidth > 600 ? 500 : 400,
                                                                     child: Column(
                                                                       crossAxisAlignment: CrossAxisAlignment.start,
                                                                       children: [
@@ -389,6 +394,7 @@ class ViewingOnWebBody extends StatelessWidget
                                                                               },
                                                                             ),
                                                                             Spacer(),
+                                      
                                                                           ],
                                                                         ),
                                                                         // Spacer(flex: 5),
@@ -399,8 +405,30 @@ class ViewingOnWebBody extends StatelessWidget
                                                               ),
                                                             ),
                                                           ),
-                                                          
-                                                        Spacer(),
+                                                                             
+                                                        Container(
+                                                          padding: EdgeInsets.only(top: 50),
+                                                          width: screenWidth,
+                                                          child: Row(
+                                                            mainAxisAlignment: MainAxisAlignment.center,
+                                                            children: <Widget>[
+                                                                  Column(
+                                                                    mainAxisAlignment: MainAxisAlignment.center,
+                                                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                                                    children: <Widget>[
+                                                                  
+                                                                      Text("Feel free to email me any questions!", style: TextStyle(fontSize: 18, color: swatch)),
+                                                                      InkWell(
+                                                                        child: Text("kevinamiller77@gmail.com", style: TextStyle(fontSize: 16, color: Colors.blue, fontStyle: FontStyle.italic),),
+                                                                        onTap: () => { launch("mailto:kevinamiller77@gmail.com?subject=Crossing%20Companion%20Inquiry")},
+                                                                      ),
+                                                                    ],
+                                                                  ),
+                                                            ],
+                                                          ),
+                                                        ),
+                                                        
+                                                        Spacer(), 
                                                       ],
                                                     ),
                                                   ),
@@ -455,18 +483,21 @@ class ViewingOnWebBody extends StatelessWidget
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: <Widget>[
                                       Container(
+                                        height: footerSize,
                                         child: Column(
                                           mainAxisAlignment: MainAxisAlignment.center,
-                                          crossAxisAlignment: CrossAxisAlignment.center,
                                           children: <Widget>[
+                                            Spacer(),
                                             InkWell(
                                               child: Text("Cookie Policy(link)", style: TextStyle(fontSize: 12, color: Colors.white, fontStyle: FontStyle.italic),),
                                               onTap: () => { launch("https://app.termly.io/document/cookie-policy/be3fb851-7620-4c9d-9c60-4752281ea432")},
                                             ),
+                                            Spacer(),
                                             InkWell(
                                               child: Text("Privacy Policy (link)", style: TextStyle(fontSize: 12, color: Colors.white, fontStyle: FontStyle.italic),),
                                               onTap: () => { launch("https://app.termly.io/document/privacy-policy/f0044ebc-16b2-42ae-a7af-cdc7eb3cb24e")},
                                             ),
+                                            Spacer(),
                                             InkWell(
                                               child: Text("Terms & Conditions (link)", style: TextStyle(fontSize: 12, color: Colors.white, fontStyle: FontStyle.italic),),
                                               onTap: () => { launch("https://app.termly.io/document/terms-of-use-for-website/61eaa3cd-ce2d-41f5-8ff3-900e97ada432")},
@@ -474,20 +505,6 @@ class ViewingOnWebBody extends StatelessWidget
                                           ],
                                           ),
                                       ),
-                                      Spacer(flex: 2),
-                                      Column(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        crossAxisAlignment: CrossAxisAlignment.center,
-                                        children: <Widget>[
-                                      
-                                          Text("Feel free to email me any questions!", style: TextStyle(fontSize: 24, color: swatch)),
-                                          InkWell(
-                                            child: Text("kevinamiller77@gmail.com", style: TextStyle(fontSize: 22, color: Colors.blue, fontStyle: FontStyle.italic),),
-                                            onTap: () => { launch("mailto:kevinamiller77@gmail.com?subject=Crossing%20Companion%20Inquiry")},
-                                          ),
-                                        ],
-                                      ),
-                                      Spacer(flex: 3),
                                     ],
                                   ),
                                 ],

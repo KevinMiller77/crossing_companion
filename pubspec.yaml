@@ -77,9 +77,9 @@ flutter:
   # list giving the asset and other descriptors for the font. For
   # example:
   fonts:
-    - family: FinkHeavy
+    - family: Fink
       fonts:
-        - asset: assets/fonts/FinkHeavy.ttf
+        - asset: assets/fonts/FinkHeavy-Regular.ttf
           style: normal
         # - asset: fonts/Schyler-Italic.ttf
   #   - family: Trajan Pro
