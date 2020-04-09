@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart'; 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:rect_getter/rect_getter.dart';
-import 'package:platform_detect/platform_detect.dart';
 
 import 'package:crossing_companion/utils/kev_utils.dart';
 
@@ -56,57 +55,35 @@ class PageHeaderState extends State<PageHeader>
 class FutureFeaturesListView extends StatelessWidget
 {
 
-  FutureFeaturesListView({this.height});
-
-  double height;
-  double featureMaxHeight = 132;
-  double paddingAllSides = 16;
-  int numTiles = 0;
-  int maxNumTiles = 0;
-
-
   @override
   Widget build(BuildContext context) {
     return new StreamBuilder(
       stream: Firestore.instance.collection('PlannedFeatures').snapshots(),
       builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot)
       {
-        numTiles = 0;
         if (!snapshot.hasData) {
           return new Text("Waiting...", textAlign: TextAlign.center, style: TextStyle(fontSize: 22),);
         }
-        return new ListView(
+        return new GridView(
+          gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+            maxCrossAxisExtent: 300,
+          ),
           shrinkWrap: true,
+          scrollDirection: Axis.vertical,
           physics: NeverScrollableScrollPhysics(),
           children: snapshot.data.documents.map((document) 
           {
-            numTiles++;
-            if (numTiles > maxNumTiles) 
-            {
-              maxNumTiles = numTiles;
-              height += featureMaxHeight + 2 * paddingAllSides;
-              print(height);
-            }
             return Container(
-              height: featureMaxHeight,
-              child: ListTile(
-                title: Text("* " + document["Name"], maxLines: 3, textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold, fontStyle: FontStyle.italic, fontSize: 22, color: Colors.white60),),
-                subtitle: Text(document["Description"], maxLines: 3, textAlign: TextAlign.center, style: TextStyle(color: Colors.white60,fontSize: 20)),
-                contentPadding: EdgeInsets.only(bottom: 60),
+              padding: EdgeInsets.only(top: 16),
+              child:ListTile(
+                  title: Text("*" + document["Name"], textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold, fontStyle: FontStyle.italic, fontSize: 22, color: Colors.white60),),
+                  subtitle: Text(document["Description"], textAlign: TextAlign.center, style: TextStyle(color: Colors.white60,fontSize: 20)),
               ),
             );
           }).toList(),
         );
       });
   }
-  
-  double getViewHeight()
-  {
-    print("Returning ");
-    print(height);
-    return height;
-  }
-
 }
 
 class ViewingOnWebBody extends StatelessWidget
@@ -149,7 +126,7 @@ class ViewingOnWebBody extends StatelessWidget
     double bodySize = screenHeight - footerSize;
 
     double featuresHeight = 0;
-    FutureFeaturesListView features = FutureFeaturesListView(height: featuresHeight);
+    FutureFeaturesListView features = FutureFeaturesListView();
 
     Color black68 = Colors.black54;
 
@@ -252,43 +229,90 @@ class ViewingOnWebBody extends StatelessWidget
                                                       children: <Widget>[
                                                           Container(
                                                             width: screenWidth,
-                                                            child: MeasureSize( 
-                                                              onChange: (size) {
-                                                                print(size);
-                                                              },
-                                                              child: Column(
-                                                                crossAxisAlignment: CrossAxisAlignment.center,
-                                                                children: [
-                                                                  Padding(
-                                                                    padding: const EdgeInsets.all(16.0),
+                                                            child: Column(
+                                                              crossAxisAlignment: CrossAxisAlignment.center,
+                                                              children: [
+                                                                Padding(
+                                                                  padding: const EdgeInsets.all(16.0),
+                                                                  child: Container(
+                                                                    width: screenWidth,
                                                                     child: Row(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
+                                                                      Spacer(),
                                                                       AnimatedDefaultTextStyle(
                                                                         child: Text("Below is a list of the current intended features.\nIf you have any suggestions, please feel free to send it over below!", textAlign: TextAlign.center), 
                                                                         style: TextStyle(color: Colors.white60, fontFamily: "Calibri", fontSize: screenWidth > 410 ? (screenWidth > 600 ? (screenWidth > 1400 ? 28 : 20) : 14) : 12), 
                                                                         duration: Duration(milliseconds: 150)
                                                                       ),
+                                                                      Spacer(),
                                                                     ]),
                                                                   ),
-                                                                  // features,                                                         //TODO: TAKE OUT MINUS 236
-                                                                  AnimatedContainer(duration: Duration(milliseconds: 150), child: ConstrainedBox(constraints: BoxConstraints(maxWidth: screenWidth > 600 ? (screenWidth > 1400 ? screenWidth / 2 : screenWidth * 2 / 3) : screenWidth * 3 / 4, maxHeight: 1500), child: features)),
-                                                                  AnimatedContainer(
-                                                                    duration: Duration(milliseconds: 150),
-                                                                    height: screenWidth > 410 ? (screenWidth > 600 ? (screenWidth > 1400 ? 650 : 600) : 550) : 500,
-                                                                    width: screenWidth > 410 ? (screenWidth > 600 ? (screenWidth > 1400 ? 700 : 600) : 400) : 350,
-                                                                    child: Column(
-                                                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                                                      children: [
-                                                                        Spacer(),
-                                                                        Padding(
-                                                                          padding: const EdgeInsets.all(8.0),
-                                                                          child: TextFormField(
-                                                                          key: _emailKey,
-                                                                          focusNode: emailFocus,
+                                                                ),
+                                                                // features,
+                                                                Row(
+                                                                  children: <Widget>[
+                                                                    Spacer(),
+                                                                    AnimatedContainer(duration: Duration(milliseconds: 150), child: ConstrainedBox(constraints: BoxConstraints(maxWidth: screenWidth - 32 > 2000 ? 2000 : screenWidth - 32 , maxHeight: 1500), child: features)),
+                                                                    Spacer(),
+                                                                  ],
+                                                                ),
+                                                                AnimatedContainer(
+                                                                  duration: Duration(milliseconds: 150),
+                                                                  height: screenWidth > 410 ? (screenWidth > 600 ? (screenWidth > 1400 ? 650 : 600) : 550) : 500,
+                                                                  width: screenWidth > 410 ? (screenWidth > 600 ? (screenWidth > 1400 ? 700 : 600) : 400) : 350,
+                                                                  child: Column(
+                                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                                    children: [
+                                                                      Spacer(),
+                                                                      Padding(
+                                                                        padding: const EdgeInsets.all(8.0),
+                                                                        child: TextFormField(
+                                                                        key: _emailKey,
+                                                                        focusNode: emailFocus,
+                                                                        decoration: InputDecoration(
+                                                                          labelText: "  Email (optional)",
+                                                                          labelStyle: TextStyle(
+                                                                            color: Colors.black87,
+                                                                            fontFamily: "Calibri"
+                                                                          ),
+                                                                          fillColor: swatch87,
+                                                                          filled: true,
+                                                                          border: OutlineInputBorder(
+                                                                            borderRadius: BorderRadius.circular(45.0),
+                                                                            borderSide: BorderSide(),
+                                                                          ),
+                                                                          enabledBorder: OutlineInputBorder(
+                                                                            borderRadius: BorderRadius.circular(45.0),
+                                                                            borderSide: BorderSide(color: swatch),
+                                                                          ),
+                                                                          focusedBorder: OutlineInputBorder(
+                                                                            borderRadius: BorderRadius.circular(45.0),
+                                                                            borderSide: BorderSide(color: swatch),
+                                                                          ),
+                                                                        ),
+                                                                        textInputAction: TextInputAction.next,
+                                                                        onFieldSubmitted: (String fieldData) {
+                                                                          _fieldFocusChange(context, emailFocus, boxFocus);
+                                                                        },
+                                                                        keyboardType: TextInputType.emailAddress,
+                                                                        style: TextStyle(
+                                                                          color: Colors.black87,
+                                                                          fontSize: 32,
+                                                                        ),
+                                                                        ),
+                                                                      ),
+                                                                      Spacer(),
+                                                                      Container(
+                                                                        height: screenWidth > 410 ? (screenWidth > 600 ? (screenWidth > 1400 ? 350 : 300) : 250) : 200,
+                                                                        child: TextFormField(
+                                                                          maxLines: 20,
+                                                                          key: _boxKey,
+                                                                          focusNode: boxFocus,
                                                                           decoration: InputDecoration(
-                                                                            labelText: "  Email (optional)",
+                                                                            labelText: "  Suggestion / Concern",
                                                                             labelStyle: TextStyle(
                                                                               color: Colors.black87,
-                                                                              fontFamily: "Calibri"
+                                                                              fontFamily: "Calibri",
+                                                                              fontSize: 32,
                                                                             ),
                                                                             fillColor: swatch87,
                                                                             filled: true,
@@ -305,95 +329,54 @@ class ViewingOnWebBody extends StatelessWidget
                                                                               borderSide: BorderSide(color: swatch),
                                                                             ),
                                                                           ),
-                                                                          textInputAction: TextInputAction.next,
                                                                           onFieldSubmitted: (String fieldData) {
-                                                                            _fieldFocusChange(context, emailFocus, boxFocus);
+                                                                            _fieldFocusChange(context, boxFocus, null);
                                                                           },
-                                                                          keyboardType: TextInputType.emailAddress,
+                                                                          validator: (val)
+                                                                          {
+                                                                            if (val.length == 0)
+                                                                            {
+                                                                              return "Please enter a suggestion!";
+                                                                            }
+                                                                            if (val.length > 200)
+                                                                            {
+                                                                              return "Suggestion too long! Please keep suggestion under 200 characters.";
+                                                                            }
+                                                                            box = val;
+                                                                            return null;
+                                                                          },
                                                                           style: TextStyle(
                                                                             color: Colors.black87,
-                                                                            fontSize: 32,
-                                                                          ),
+                                                                            fontSize: 26,
                                                                           ),
                                                                         ),
-                                                                        Spacer(),
-                                                                        Container(
-                                                                          height: screenWidth > 410 ? (screenWidth > 600 ? (screenWidth > 1400 ? 350 : 300) : 250) : 200,
-                                                                          child: TextFormField(
-                                                                            maxLines: 20,
-                                                                            key: _boxKey,
-                                                                            focusNode: boxFocus,
-                                                                            decoration: InputDecoration(
-                                                                              labelText: "  Suggestion / Concern",
-                                                                              labelStyle: TextStyle(
-                                                                                color: Colors.black87,
-                                                                                fontFamily: "Calibri",
-                                                                                fontSize: 32,
-                                                                              ),
-                                                                              fillColor: swatch87,
-                                                                              filled: true,
-                                                                              border: OutlineInputBorder(
-                                                                                borderRadius: BorderRadius.circular(45.0),
-                                                                                borderSide: BorderSide(),
-                                                                              ),
-                                                                              enabledBorder: OutlineInputBorder(
-                                                                                borderRadius: BorderRadius.circular(45.0),
-                                                                                borderSide: BorderSide(color: swatch),
-                                                                              ),
-                                                                              focusedBorder: OutlineInputBorder(
-                                                                                borderRadius: BorderRadius.circular(45.0),
-                                                                                borderSide: BorderSide(color: swatch),
-                                                                              ),
-                                                                            ),
-                                                                            onFieldSubmitted: (String fieldData) {
-                                                                              _fieldFocusChange(context, boxFocus, null);
-                                                                            },
-                                                                            validator: (val)
+                                                                      ),
+                                                                      Spacer(),
+                                                                      Row(
+                                                                        children: <Widget>[
+                                                                          Spacer(),
+                                                                          RaisedButton(
+                                                                            textTheme: ButtonTextTheme.normal,
+                                                                            color: swatch,
+                                                                            shape: RoundedRectangleBorder(
+                                                                              borderRadius: BorderRadius.circular(45.0),
+                                                                              side: BorderSide(color: swatch),
+                                                                            ), 
+                                                                            child: Text("Submit feedback", style: TextStyle(color: Colors.black87, fontSize: 18),), 
+                                                                            onPressed: () 
                                                                             {
-                                                                              if (val.length == 0)
-                                                                              {
-                                                                                return "Please enter a suggestion!";
-                                                                              }
-                                                                              if (val.length > 200)
-                                                                              {
-                                                                                return "Suggestion too long! Please keep suggestion under 200 characters.";
-                                                                              }
-                                                                              box = val;
-                                                                              return null;
+                                                                              _submitFeedback();
                                                                             },
-                                                                            style: TextStyle(
-                                                                              color: Colors.black87,
-                                                                              fontSize: 26,
-                                                                            ),
                                                                           ),
-                                                                        ),
-                                                                        Spacer(),
-                                                                        Row(
-                                                                          children: <Widget>[
-                                                                            Spacer(),
-                                                                            RaisedButton(
-                                                                              textTheme: ButtonTextTheme.normal,
-                                                                              color: swatch,
-                                                                              shape: RoundedRectangleBorder(
-                                                                                borderRadius: BorderRadius.circular(45.0),
-                                                                                side: BorderSide(color: swatch),
-                                                                              ), 
-                                                                              child: Text("Submit feedback", style: TextStyle(color: Colors.black87, fontSize: 18),), 
-                                                                              onPressed: () 
-                                                                              {
-                                                                                _submitFeedback();
-                                                                              },
-                                                                            ),
-                                                                            Spacer(),
-                                      
-                                                                          ],
-                                                                        ),
-                                                                        // Spacer(flex: 5),
-                                                                      ],
-                                                                    ),
+                                                                          Spacer(),
+                                    
+                                                                        ],
+                                                                      ),
+                                                                      // Spacer(flex: 5),
+                                                                    ],
                                                                   ),
-                                                                ],
-                                                              ),
+                                                                ),
+                                                              ],
                                                             ),
                                                           ),
                                                                              

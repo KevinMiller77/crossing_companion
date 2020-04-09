@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'dart:developer';
+// import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -441,7 +441,7 @@ class CCLoginState extends State<CCLoginPage> with TickerProviderStateMixin
                           {
                             widget.auth.googleSignIn().whenComplete(()
                               {
-                                log("Signed in with google\n");
+                                print("Signed in with google\n");
                               }
                             );
                           },
