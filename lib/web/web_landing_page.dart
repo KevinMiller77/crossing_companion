@@ -57,6 +57,9 @@ class FutureFeaturesListView extends StatelessWidget
 
   @override
   Widget build(BuildContext context) {
+
+    double width = MediaQuery.of(context).size.width;
+
     return new StreamBuilder(
       stream: Firestore.instance.collection('PlannedFeatures').snapshots(),
       builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot)
@@ -64,9 +67,10 @@ class FutureFeaturesListView extends StatelessWidget
         if (!snapshot.hasData) {
           return new Text("Waiting...", textAlign: TextAlign.center, style: TextStyle(fontSize: 22),);
         }
-        return new GridView(
-          gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-            maxCrossAxisExtent: 300,
+        return width > 440 ? GridView(
+          gridDelegate: 
+          SliverGridDelegateWithMaxCrossAxisExtent(
+            maxCrossAxisExtent: width >= 720 ? (width >= 1280 ? (width >= 1920 ? (width >= 2560 ? 250 : 300) : 310) : 300) : 250,
           ),
           shrinkWrap: true,
           scrollDirection: Axis.vertical,
@@ -74,11 +78,29 @@ class FutureFeaturesListView extends StatelessWidget
           children: snapshot.data.documents.map((document) 
           {
             return Container(
-              padding: EdgeInsets.only(top: 16),
-              child:ListTile(
-                  title: Text("*" + document["Name"], textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold, fontStyle: FontStyle.italic, fontSize: 22, color: Colors.white60),),
-                  subtitle: Text(document["Description"], textAlign: TextAlign.center, style: TextStyle(color: Colors.white60,fontSize: 20)),
-              ),
+                child: Center(
+                  child: ListTile(
+                      title: Text("*" + document["Name"], textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold, fontStyle: FontStyle.italic, fontSize: 22, color: Colors.white60),),
+                      subtitle: Text(document["Description"], maxLines: 8, textAlign: TextAlign.center, style: TextStyle(color: Colors.white60,fontSize: 20)),
+                  ),
+                ),
+            );
+          }).toList(),
+        )
+        :
+        ListView(
+          shrinkWrap: true,
+          scrollDirection: Axis.vertical,
+          physics: NeverScrollableScrollPhysics(),
+          children: snapshot.data.documents.map((document) 
+          {
+            return Container(
+                child: Center(
+                  child: ListTile(
+                      title: Text("*" + document["Name"], textAlign: TextAlign.center, style: TextStyle(fontWeight: FontWeight.bold, fontStyle: FontStyle.italic, fontSize: 22, color: Colors.white60),),
+                      subtitle: Text(document["Description"], maxLines: 8, textAlign: TextAlign.center, style: TextStyle(color: Colors.white60,fontSize: 20)),
+                  ),
+                ),
             );
           }).toList(),
         );
@@ -179,7 +201,7 @@ class ViewingOnWebBody extends StatelessWidget
                                                 Padding(padding: EdgeInsets.only(right: 32),),
                                                 AnimatedDefaultTextStyle(
                                                                   child: Text("Crossing Companion", textAlign: TextAlign.center), 
-                                                                  style: TextStyle(color: swatch, fontWeight: FontWeight.bold, fontFamily: "Fink",fontSize: screenWidth > 410 ? (screenWidth > 600 ? (screenWidth > 1400 ? 42 : 34) : 28) : 24), 
+                                                                  style: TextStyle(color: swatch, fontWeight: FontWeight.bold, fontFamily: "Fink",fontSize: screenWidth >= 720 ? (screenWidth >= 1280 ? (screenWidth >= 1920 ? 42 : 34) : 28) : 24), 
                                                                   duration: Duration(milliseconds: 150)
                                                                 ),
 
@@ -203,14 +225,14 @@ class ViewingOnWebBody extends StatelessWidget
                                       Padding(padding: EdgeInsets.only(top: 50)),
                                         AnimatedDefaultTextStyle(
                                                       child: Text("App info page!", style: TextStyle( decoration: TextDecoration.underline), textAlign: TextAlign.center), 
-                                                                  style: TextStyle(color: swatch, fontWeight: FontWeight.bold, fontFamily: "Fink",fontSize: screenWidth > 410 ? (screenWidth > 600 ? (screenWidth > 1400 ? 42 : 34) : 28) : 24), 
+                                                                  style: TextStyle(color: swatch, fontWeight: FontWeight.bold, fontFamily: "Fink",fontSize: screenWidth >= 720 ? (screenWidth >= 1280 ? (screenWidth >= 1920 ? 42 : 34) : 28) : 24), 
                                                                   duration: Duration(milliseconds: 150)
                                                     ),
                                         Padding(padding: EdgeInsets.only(top: 75)),
                                         Row(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
                                             AnimatedDefaultTextStyle(
                                               child: Text("The app is still currently in development!\nHopefully we'll be launching within the next few weeks!", textAlign: TextAlign.center), 
-                                              style: TextStyle(color: swatch, fontFamily: "Calibri", fontSize: screenWidth > 410 ? (screenWidth > 600 ? (screenWidth > 1400 ? 36 : 26) : 18) : 14), 
+                                              style: TextStyle(color: swatch, fontFamily: "Calibri", fontSize: screenWidth >= 720 ? (screenWidth >= 1280 ? (screenWidth >= 1920 ? 36 : 26) : 18) : 14), 
                                               duration: Duration(milliseconds: 150)
                                             ),],
                                         ),
@@ -240,7 +262,7 @@ class ViewingOnWebBody extends StatelessWidget
                                                                       Spacer(),
                                                                       AnimatedDefaultTextStyle(
                                                                         child: Text("Below is a list of the current intended features.\nIf you have any suggestions, please feel free to send it over below!", textAlign: TextAlign.center), 
-                                                                        style: TextStyle(color: Colors.white60, fontFamily: "Calibri", fontSize: screenWidth > 410 ? (screenWidth > 600 ? (screenWidth > 1400 ? 28 : 20) : 14) : 12), 
+                                                                        style: TextStyle(color: Colors.white60, fontFamily: "Calibri", fontSize: screenWidth >= 440 ? (screenWidth >= 720 ? (screenWidth >= 1280 ? (screenWidth >= 1920 ? 28 : 20) : 14) : 12) : 10), 
                                                                         duration: Duration(milliseconds: 150)
                                                                       ),
                                                                       Spacer(),
@@ -257,8 +279,8 @@ class ViewingOnWebBody extends StatelessWidget
                                                                 ),
                                                                 AnimatedContainer(
                                                                   duration: Duration(milliseconds: 150),
-                                                                  height: screenWidth > 410 ? (screenWidth > 600 ? (screenWidth > 1400 ? 650 : 600) : 550) : 500,
-                                                                  width: screenWidth > 410 ? (screenWidth > 600 ? (screenWidth > 1400 ? 700 : 600) : 400) : 350,
+                                                                  height: screenWidth >= 720 ? (screenWidth >= 1280 ? (screenWidth >= 1920 ? 700 : 600) : 550) : 500,
+                                                                  width: screenWidth >= 720 ? (screenWidth >= 1280 ? (screenWidth >= 1920 ? 700 : 600) : 400) : 350,
                                                                   child: Column(
                                                                     crossAxisAlignment: CrossAxisAlignment.start,
                                                                     children: [
@@ -302,7 +324,7 @@ class ViewingOnWebBody extends StatelessWidget
                                                                       ),
                                                                       Spacer(),
                                                                       Container(
-                                                                        height: screenWidth > 410 ? (screenWidth > 600 ? (screenWidth > 1400 ? 350 : 300) : 250) : 200,
+                                                                        height: screenWidth >= 720 ? (screenWidth >= 1280 ? (screenWidth >= 1920 ? 350 : 300) : 250) : 200,
                                                                         child: TextFormField(
                                                                           maxLines: 20,
                                                                           key: _boxKey,
@@ -445,17 +467,21 @@ class ViewingOnWebBody extends StatelessWidget
                                           children: <Widget>[
                                             Spacer(flex: 3),
                                             InkWell(
-                                              child: Text("Cookie Policy(link)", style: TextStyle(fontSize: 12, color: Colors.white, fontStyle: FontStyle.italic),),
+                                              child: Text("Cookie Policy(link)", style: TextStyle(fontSize: screenWidth > 440 ? 12 : 10, color: Colors.white, fontStyle: FontStyle.italic),),
                                               onTap: () => { launch("https://app.termly.io/document/cookie-policy/be3fb851-7620-4c9d-9c60-4752281ea432")},
                                             ),
                                             Spacer(),
+                                            Text("|", style: TextStyle(fontSize: screenWidth > 440 ? 12 : 10, color: Colors.white, fontStyle: FontStyle.italic)),
+                                            Spacer(),
                                             InkWell(
-                                              child: Text("Privacy Policy (link)", style: TextStyle(fontSize: 12, color: Colors.white, fontStyle: FontStyle.italic),),
+                                              child: Text("Privacy Policy (link)", style: TextStyle(fontSize: screenWidth > 440 ? 12 : 10, color: Colors.white, fontStyle: FontStyle.italic),),
                                               onTap: () => { launch("https://crossingcompanion.web.app/privacy-policy/index.html")},
                                             ),
                                             Spacer(),
+                                            Text("|", style: TextStyle(fontSize: screenWidth > 440 ? 12 : 10, color: Colors.white, fontStyle: FontStyle.italic)),
+                                            Spacer(),
                                             InkWell(
-                                              child: Text("Terms & Conditions (link)", style: TextStyle(fontSize: 12, color: Colors.white, fontStyle: FontStyle.italic),),
+                                              child: Text("Terms & Conditions (link)", style: TextStyle(fontSize: screenWidth > 440 ? 12 : 10, color: Colors.white, fontStyle: FontStyle.italic),),
                                               onTap: () => { launch("https://crossingcompanion.web.app/terms-of-use/index.html")},
                                             ),
                                             Spacer(flex: 3),
