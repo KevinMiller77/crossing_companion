@@ -198,11 +198,14 @@ class ViewingOnWebBody extends StatelessWidget
                                               mainAxisAlignment: MainAxisAlignment.center,
                                               crossAxisAlignment: CrossAxisAlignment.center,
                                               children: <Widget>[
+                                                Container(height: 75, width: 75, child: Image(image: AssetImage("assets/images/CCLogo.png"),fit: BoxFit.fitHeight)),
+                                                Padding(padding: EdgeInsets.only(right: 32),),
                                                 AnimatedDefaultTextStyle(
                                                                   child: Text("Crossing Companion", textAlign: TextAlign.center), 
-                                                                  style: TextStyle(color: swatch, fontWeight: FontWeight.bold, fontFamily: "Fink",fontSize: screenWidth > 410 ? (screenWidth > 600 ? (screenWidth > 1400 ? 42 : 34) : 22) : 12), 
+                                                                  style: TextStyle(color: swatch, fontWeight: FontWeight.bold, fontFamily: "Fink",fontSize: screenWidth > 410 ? (screenWidth > 600 ? (screenWidth > 1400 ? 42 : 34) : 28) : 24), 
                                                                   duration: Duration(milliseconds: 150)
                                                                 ),
+
                                               ],
                                             ),
                                           ),
@@ -217,25 +220,13 @@ class ViewingOnWebBody extends StatelessWidget
                                             ),
                                             height: 75,
                                             width: MediaQuery.of(context).size.width,
-                                            child: Column(
-                                              children: <Widget>[
-                                                Row(
-                                                  crossAxisAlignment: CrossAxisAlignment.center, 
-                                                  children: <Widget>[
-                                                    Padding(padding: EdgeInsets.only(right: leftHeaderPadding,)),
-                                                    Container(height: 75, width: 75, child: Image(image: AssetImage("assets/images/CCLogo.png"),fit: BoxFit.fitHeight)),
-                                                    
-                                                  ],
-                                                ),
-                                              ],
-                                            ),
                                           ),
                                         ],
                                       ),
                                       Padding(padding: EdgeInsets.only(top: 50)),
                                         AnimatedDefaultTextStyle(
                                                       child: Text("App info page!", style: TextStyle( decoration: TextDecoration.underline), textAlign: TextAlign.center), 
-                                                                  style: TextStyle(color: swatch, fontWeight: FontWeight.bold, fontFamily: "Fink",fontSize: screenWidth > 410 ? (screenWidth > 600 ? (screenWidth > 1400 ? 42 : 34) : 22) : 16), 
+                                                                  style: TextStyle(color: swatch, fontWeight: FontWeight.bold, fontFamily: "Fink",fontSize: screenWidth > 410 ? (screenWidth > 600 ? (screenWidth > 1400 ? 42 : 34) : 28) : 24), 
                                                                   duration: Duration(milliseconds: 150)
                                                     ),
                                         Padding(padding: EdgeInsets.only(top: 75)),
@@ -279,7 +270,7 @@ class ViewingOnWebBody extends StatelessWidget
                                                                     ]),
                                                                   ),
                                                                   // features,                                                         //TODO: TAKE OUT MINUS 236
-                                                                  AnimatedContainer(duration: Duration(milliseconds: 150), child: ConstrainedBox(constraints: BoxConstraints(maxWidth: screenWidth > 600 ? (screenWidth > 1400 ? screenWidth / 2 : screenWidth / 2) : screenWidth/2, maxHeight: 1500), child: features)),
+                                                                  AnimatedContainer(duration: Duration(milliseconds: 150), child: ConstrainedBox(constraints: BoxConstraints(maxWidth: screenWidth > 600 ? (screenWidth > 1400 ? screenWidth / 2 : screenWidth * 2 / 3) : screenWidth * 3 / 4, maxHeight: 1500), child: features)),
                                                                   AnimatedContainer(
                                                                     duration: Duration(milliseconds: 150),
                                                                     height: screenWidth > 410 ? (screenWidth > 600 ? (screenWidth > 1400 ? 650 : 600) : 550) : 500,
@@ -477,12 +468,12 @@ class ViewingOnWebBody extends StatelessWidget
                                             Spacer(),
                                             InkWell(
                                               child: Text("Privacy Policy (link)", style: TextStyle(fontSize: 12, color: Colors.white, fontStyle: FontStyle.italic),),
-                                              onTap: () => { launch("https://crossingcompanion.web.app/terms-of-use")},
+                                              onTap: () => { launch("https://crossingcompanion.web.app/privacy-policy/index.html")},
                                             ),
                                             Spacer(),
                                             InkWell(
                                               child: Text("Terms & Conditions (link)", style: TextStyle(fontSize: 12, color: Colors.white, fontStyle: FontStyle.italic),),
-                                              onTap: () => { launch("https://crossingcompanion.web.app/privacy-policy")},
+                                              onTap: () => { launch("https://crossingcompanion.web.app/terms-of-use/index.html")},
                                             ),
                                             Spacer(flex: 3),
                                           ],
