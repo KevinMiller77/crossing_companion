@@ -1,9 +1,10 @@
 import 'dart:async';
 // import 'dart:developer';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:keyboard_visibility/keyboard_visibility.dart';
+import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:crossing_companion/utils/kev_utils.dart';
@@ -109,6 +110,243 @@ class CCLoginState extends State<CCLoginPage> with TickerProviderStateMixin
     usernameFocus.dispose();
   }
 
+  Widget loginForm()
+  {
+    return AnimatedContainer(
+      duration: Duration(milliseconds: 500),
+      padding: EdgeInsets.only(top: buttonPad),
+      child: Container(
+        child: Column (crossAxisAlignment: CrossAxisAlignment.center, children: <Widget>[
+          
+          Padding(
+          padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
+          child: TextFormField(
+            key: _emailKey,
+            focusNode: emailFocus,
+            decoration: InputDecoration(
+              labelText: " Email",
+              labelStyle: TextStyle(
+                color: Colors.white38,
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(45.0),
+                borderSide: BorderSide(),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(45.0),
+                borderSide: BorderSide(color: swatchColor),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(45.0),
+                borderSide: BorderSide(color: swatchColor),
+              ),
+            ),
+            textInputAction: TextInputAction.next,
+            onFieldSubmitted: (String fieldData) {
+              print("Email: " + fieldData);
+              _fieldFocusChange(context, usernameFocus, passwordFocus);
+            },
+            validator: (val)
+            {
+              if (val.length == 0)
+              {
+                return "Email cannot be empty";
+              }
+              email = val;
+              return null;
+            },
+            keyboardType: TextInputType.emailAddress,
+            style: TextStyle(
+              color: swatchColor,
+              fontSize: 32,
+            ),
+            ),
+          ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
+          child: TextFormField(
+            key: _passKey,
+            focusNode: passwordFocus,
+            decoration: InputDecoration(
+              labelText: " Password",
+              labelStyle: TextStyle(
+                color: Colors.white38,
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(45.0),
+                borderSide: BorderSide(),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(45.0),
+                borderSide: BorderSide(color: swatchColor),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(45.0),
+                borderSide: BorderSide(color: swatchColor),
+              ),
+              
+              ),
+            textInputAction: TextInputAction.next,
+            onFieldSubmitted: (String fieldData) {
+              if (creatingAccount)
+              {
+                _fieldFocusChange(context, passwordFocus, passVerfFocus);
+              }
+              else
+              {
+                _fieldFocusChange(context, passwordFocus, null);
+                _login();
+              }
+            },
+            validator: (val)
+            {
+              if (val.length == 0)
+              {
+                return "Password cannot be empty";
+              } else 
+              {
+                password = val;
+                return null;
+              }
+            },
+            obscureText: true,
+            keyboardType: TextInputType.text,
+            style: TextStyle(
+              color: swatchColor,
+              fontSize: 32,
+            ),
+            
+          ),
+        ),
+        
+        AnimatedOpacity(
+          opacity: creatingAccount ? 1.0 : 0.0,
+          duration: Duration(milliseconds: 500),
+          child: AnimatedSize(
+            vsync: this,
+            duration: Duration(milliseconds: 500),
+            child: Container(
+              height: userButtonHeight,
+              padding: EdgeInsets.fromLTRB(24, 0, 24, 0),
+              child: Column(children: <Widget>[
+                TextFormField(
+                focusNode: passVerfFocus,
+                key: _passVerfKey,
+                obscureText: true,
+                decoration: InputDecoration(
+                  labelText: "Verify Password",
+                  labelStyle: TextStyle(
+                    color: Colors.white38,
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(45.0),
+                    borderSide: BorderSide(),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(45.0),
+                    borderSide: BorderSide(color: swatchColor),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(45.0),
+                    borderSide: BorderSide(color: swatchColor),
+                  ),
+                  
+                ),
+                textInputAction: TextInputAction.next,
+                onFieldSubmitted: (String fieldData) {
+                  if (creatingAccount)
+                  {
+                    _fieldFocusChange(context, passVerfFocus, usernameFocus);
+                  }
+                },
+                validator: (val)
+                {
+                  if (val.length == 0 && creatingAccount)
+                  {
+                    return "Please re-enter your password!";
+                  } else 
+                  {
+                    _passKey.currentState.validate();
+                    if (val != password) return "Passwords must match!";
+
+                    passVerf = val;
+                    return null;
+                  }
+                },
+                keyboardType: TextInputType.text,
+                style: TextStyle(
+                  color: swatchColor,
+                  fontSize: 32,
+                ),
+              ),
+              Padding(padding: EdgeInsets.only(top: 16,)),
+                TextFormField(
+                focusNode: usernameFocus,
+                key: _userKey,
+                decoration: InputDecoration(
+                  labelText: " Username",
+                  labelStyle: TextStyle(
+                    color: Colors.white38,
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(45.0),
+                    borderSide: BorderSide(),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(45.0),
+                    borderSide: BorderSide(color: swatchColor),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(45.0),
+                    borderSide: BorderSide(color: swatchColor),
+                  ),
+                  
+                ),
+                textInputAction: TextInputAction.next,
+                onFieldSubmitted: (String fieldData) {
+                  if (creatingAccount)
+                  {
+                    _createAccount();
+                  }
+                  _fieldFocusChange(context, usernameFocus, null);
+                },
+                validator: (val)
+                {
+                  if (val.length == 0 && creatingAccount)
+                  {
+                    return "Username cannot be empty";
+                  } 
+                  else if (!checkIfUserTaken(val))
+                  {
+                    alertMessage("Username already taken!");
+                    return "Username already taken!";
+                  }
+                  else 
+                  {
+                    username = val;
+                    return null;
+                  }
+                },
+                keyboardType: TextInputType.text,
+                style: TextStyle(
+                  color: swatchColor,
+                  fontSize: 32,
+                ),
+              ),
+              ],
+              ),
+            ),
+          ),
+        ),
+      ],
+  ),
+),
+    );
+  }
+
+
+
+
   @override
   Widget build(BuildContext context) {
     
@@ -152,230 +390,7 @@ class CCLoginState extends State<CCLoginPage> with TickerProviderStateMixin
                       ),
                       padding: EdgeInsets.fromLTRB(30, 0, 30, 20),
                     ),
-                    AnimatedContainer(
-                      duration: Duration(milliseconds: 500),
-                      padding: EdgeInsets.only(top: buttonPad),
-                      child: Container(
-                        child: Column (crossAxisAlignment: CrossAxisAlignment.center, children: <Widget>[
-                          
-                          Padding(
-                          padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
-                          child: TextFormField(
-                            key: _emailKey,
-                            focusNode: emailFocus,
-                            decoration: InputDecoration(
-                              labelText: " Email",
-                              labelStyle: TextStyle(
-                                color: Colors.white38,
-                              ),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(45.0),
-                                borderSide: BorderSide(),
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(45.0),
-                                borderSide: BorderSide(color: swatchColor),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(45.0),
-                                borderSide: BorderSide(color: swatchColor),
-                              ),
-                            ),
-                            textInputAction: TextInputAction.next,
-                            onFieldSubmitted: (String fieldData) {
-                              print("Email: " + fieldData);
-                              _fieldFocusChange(context, usernameFocus, passwordFocus);
-                            },
-                            validator: (val)
-                            {
-                              if (val.length == 0)
-                              {
-                                return "Email cannot be empty";
-                              }
-                              email = val;
-                              return null;
-                            },
-                            keyboardType: TextInputType.emailAddress,
-                            style: TextStyle(
-                              color: swatchColor,
-                              fontSize: 32,
-                            ),
-                            ),
-                          ),
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
-                          child: TextFormField(
-                            key: _passKey,
-                            focusNode: passwordFocus,
-                            decoration: InputDecoration(
-                              labelText: " Password",
-                              labelStyle: TextStyle(
-                                color: Colors.white38,
-                              ),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(45.0),
-                                borderSide: BorderSide(),
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(45.0),
-                                borderSide: BorderSide(color: swatchColor),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(45.0),
-                                borderSide: BorderSide(color: swatchColor),
-                              ),
-                              
-                              ),
-                            textInputAction: TextInputAction.next,
-                            onFieldSubmitted: (String fieldData) {
-                              if (creatingAccount)
-                              {
-                                _fieldFocusChange(context, passwordFocus, passVerfFocus);
-                              }
-                              else
-                              {
-                                _fieldFocusChange(context, passwordFocus, null);
-                                _login();
-                              }
-                            },
-                            validator: (val)
-                            {
-                              if (val.length == 0)
-                              {
-                                return "Password cannot be empty";
-                              } else 
-                              {
-                                password = val;
-                                return null;
-                              }
-                            },
-                            obscureText: true,
-                            keyboardType: TextInputType.text,
-                            style: TextStyle(
-                              color: swatchColor,
-                              fontSize: 32,
-                            ),
-                            
-                          ),
-                        ),
-                        
-                        AnimatedOpacity(
-                          opacity: creatingAccount ? 1.0 : 0.0,
-                          duration: Duration(milliseconds: 500),
-                          child: AnimatedSize(
-                            vsync: this,
-                            duration: Duration(milliseconds: 500),
-                            child: Container(
-                              height: userButtonHeight,
-                              padding: EdgeInsets.fromLTRB(24, 0, 24, 0),
-                              child: Column(children: <Widget>[
-                                TextFormField(
-                                focusNode: passVerfFocus,
-                                key: _passVerfKey,
-                                obscureText: true,
-                                decoration: InputDecoration(
-                                  labelText: "Verify Password",
-                                  labelStyle: TextStyle(
-                                    color: Colors.white38,
-                                  ),
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(45.0),
-                                    borderSide: BorderSide(),
-                                  ),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(45.0),
-                                    borderSide: BorderSide(color: swatchColor),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(45.0),
-                                    borderSide: BorderSide(color: swatchColor),
-                                  ),
-                                  
-                                ),
-                                textInputAction: TextInputAction.next,
-                                onFieldSubmitted: (String fieldData) {
-                                  if (creatingAccount)
-                                  {
-                                    _fieldFocusChange(context, passVerfFocus, usernameFocus);
-                                  }
-                                },
-                                validator: (val)
-                                {
-                                  if (val.length == 0 && creatingAccount)
-                                  {
-                                    return "Please re-enter your password!";
-                                  } else 
-                                  {
-                                    _passKey.currentState.validate();
-                                    if (val != password) return "Passwords must match!";
-
-                                    username = val;
-                                    return null;
-                                  }
-                                },
-                                keyboardType: TextInputType.text,
-                                style: TextStyle(
-                                  color: swatchColor,
-                                  fontSize: 32,
-                                ),
-                              ),
-                              Padding(padding: EdgeInsets.only(top: 16,)),
-                                TextFormField(
-                                focusNode: usernameFocus,
-                                key: _userKey,
-                                decoration: InputDecoration(
-                                  labelText: " Username",
-                                  labelStyle: TextStyle(
-                                    color: Colors.white38,
-                                  ),
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(45.0),
-                                    borderSide: BorderSide(),
-                                  ),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(45.0),
-                                    borderSide: BorderSide(color: swatchColor),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(45.0),
-                                    borderSide: BorderSide(color: swatchColor),
-                                  ),
-                                  
-                                ),
-                                textInputAction: TextInputAction.next,
-                                onFieldSubmitted: (String fieldData) {
-                                  if (creatingAccount)
-                                  {
-                                    _createAccount();
-                                  }
-                                  _fieldFocusChange(context, usernameFocus, null);
-                                },
-                                validator: (val)
-                                {
-                                  if (val.length == 0 && creatingAccount)
-                                  {
-                                    return "Username cannot be empty";
-                                  } else 
-                                  {
-                                    username = val;
-                                    return null;
-                                  }
-                                },
-                                keyboardType: TextInputType.text,
-                                style: TextStyle(
-                                  color: swatchColor,
-                                  fontSize: 32,
-                                ),
-                              ),
-                              ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                  ),
-                ),
-                    ),
+                    loginForm(),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
@@ -457,7 +472,7 @@ class CCLoginState extends State<CCLoginPage> with TickerProviderStateMixin
                             if (_emailKey.currentState.validate())
                             {
                               widget.auth.resetPassword(email);
-                              errorText = "You have been sent a password reset email\nif you have an account";
+                              alertMessage("You have been sent a password reset email\nif you have an account");
                               setState(() {
                                 errorPopupVisible = true;
                               });
@@ -595,11 +610,11 @@ class CCLoginState extends State<CCLoginPage> with TickerProviderStateMixin
 
       // Map<String, dynamic> userInfo = Map<String, dynamic>();
       Firestore.instance.collection('userinfo').document(userId)
-          .setData({"Username": username, "Email": email});
+          .setData({"Username": username.trim(), "Email": email.trim()});
 
       userId = await widget.auth.signIn(email.trim(), password);
 
-      errorText = "You account has been created!";
+      alertMessage("You account has been created!");
       setState(() {
         errorPopupVisible = true;
         
@@ -618,54 +633,30 @@ class CCLoginState extends State<CCLoginPage> with TickerProviderStateMixin
     } catch (e) {
       print('Error: $e');
       if(e.code == 'ERROR_EMAIL_ALREADY_IN_USE') {
-        errorText = "Your email address is already registered!";
-        setState(() {
-          errorPopupVisible = true;
-        });
-        startPopupTimer();
-      /// `foo@bar.com` has alread been registered.
-      }
-      else if (e.code == "ERROR_USER_NOT_FOUND")
+        alertMessage("Your email address is already registered!");
+        creatingAccount = false;
+      } else if (e.code == "ERROR_USER_NOT_FOUND")
       {
-        errorText = "You do not have an account! Please create one.";
+        alertMessage("You do not have an account! Please create one.");
         setState(() {
           creatingAccount = false;
-          errorPopupVisible = true;
           _createAccount();
         });
-        startPopupTimer();
-      }
-      else if (e.code == "ERROR_WEAK_PASSWORD")
+      } else if (e.code == "ERROR_WEAK_PASSWORD")
       {
-        errorText = "Weak password! Must be at least 6 characters.";
-        setState(() {
-          errorPopupVisible = true;
-        });
-        startPopupTimer();
-      }
-      else if (e.code == "ERROR_WRONG_PASSWORD")
+        alertMessage("Weak password! Must be at least 6 characters.");        
+      } else if (e.code == "ERROR_WRONG_PASSWORD")
       {
-        errorText = "Invalid password!";
-        setState(() {
-          errorPopupVisible = true;
-        });
-        startPopupTimer();
-      }
-      else if (e.code == "ERROR_TOO_MANY_REQUESTS")
+        alertMessage("Invalid password!");
+      } else if (e.code == "ERROR_TOO_MANY_REQUESTS")
       {
-        errorText = "Too many requests!";
-        setState(() {
-          errorPopupVisible = true;
-        });
-        startPopupTimer();
-      }
-      else if (e.code != null)
+        alertMessage("Too many requests!");
+      } else if (e.code != null)
       {
-        errorText = "Unknown login error!";
-        setState(() {
-          errorPopupVisible = true;
-        });
-        startPopupTimer();
+        alertMessage("Unknown login error!");
+      } else if (e.code == "ERROR_INVALID_EMAIL")
+      {
+        alertMessage("Email incorrectly formatted!");
       }
 
       setState(() {
@@ -681,8 +672,33 @@ class CCLoginState extends State<CCLoginPage> with TickerProviderStateMixin
     }
   }
 
+  alertMessage(String message)
+  {
+    errorText = message;
+    setState(() {
+      errorPopupVisible = true;
+    });
+    startPopupTimer();
+  }
+
   _fieldFocusChange(BuildContext context, FocusNode currentFocus,FocusNode nextFocus) {
     currentFocus.unfocus();
     FocusScope.of(context).requestFocus(nextFocus);  
+  }
+
+  bool checkIfUserTaken(String attemptedName)
+  {
+    bool out = false;
+    Firestore.instance.collection("userinfo").snapshots().listen((snapshot) {
+      out = snapshot.documents.every((element) { 
+        String currentElm = element.data["Username"];
+        if (currentElm != null)
+        {
+          return !(currentElm.trim().toLowerCase() == attemptedName.trim().toLowerCase());
+        }
+        return true;
+      });
+    });
+    return true;
   }
 }

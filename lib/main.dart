@@ -14,6 +14,7 @@ void main() {
     runApp(CCAppMain());
   }
 }
+
 class CCWebAppMain extends StatelessWidget {
   // This widget is the root of your application.
   @override
