@@ -164,10 +164,9 @@ class Auth implements BaseAuth {
     }
     catch(e)
     {
-      if (e.code == "sign_in_failed" || e.code == "sign_in_canceled")
-      {
-        return "";
-      }
+      print("Google sign-in error!!: " + e.code);
+      e.details != null ? print("Details of error: " + e.details) : print("No error details");
+      return "";
     }
     final GoogleSignInAuthentication googleSignInAuthentication =
         await googleSignInAccount.authentication;
@@ -187,6 +186,7 @@ class Auth implements BaseAuth {
     assert(user.uid == currentUser.uid);
 
     signedInWithGoogle = true;
+    print("Google user signed in:" + user.uid);
     return user.uid;
   }
 

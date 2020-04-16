@@ -463,6 +463,21 @@ class CCLoginState extends State<CCLoginPage> with TickerProviderStateMixin
                               });
                               startPopupTimer();
                             }
+                            else
+                            {
+                              if (creatingAccount)
+                              {
+                                errorText = "Please enter an email!";
+                                setState(() {
+                                  buttonPad = creatingAccount ? 60 : 0;
+                                  userButtonHeight = 0;
+                                  creatingAccount = false;
+                                  errorPopupVisible = true;
+                                });
+                                startPopupTimer();
+                                return;
+                              }
+                            }
                             
                           },
                         ),
@@ -550,6 +565,15 @@ class CCLoginState extends State<CCLoginPage> with TickerProviderStateMixin
 
   void _login()
   {
+    if (creatingAccount)
+    {
+      setState(() {
+        buttonPad = creatingAccount ? 60 : 0;
+        userButtonHeight = 0;
+        creatingAccount = false;
+      });
+      return;
+    }
     if (_emailKey.currentState.validate() && _passKey.currentState.validate())
     {
         signingUp = false;
