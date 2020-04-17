@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crossing_companion/cc.dart';
 import 'package:crossing_companion/ui/home.dart';
 import 'package:flutter/material.dart';
@@ -40,8 +41,24 @@ class CCRootState extends State<CCRootPage>
         {
           _user = user?.uid;
         }
-        _authStatus = user?.uid == null ? AuthStatus.NOT_LOGGED_IN : AuthStatus.LOGGED_IN;
+        _authStatus = user?.uid == null ? AuthStatus.NOT_LOGGED_IN : AuthStatus.NOT_DETERMINED;
       });
+    });
+
+    if(_user == null) return;
+    Firestore.instance.collection("userinfo").document(_user).get().then((value) 
+    {
+      if (value.exists)
+      {
+        print(value);
+        if (value["AcctCreated"])
+        {
+          setState(() {
+            _authStatus = AuthStatus.LOGGED_IN; 
+          });
+        }
+        
+      }
     });
   }
 
@@ -53,10 +70,23 @@ class CCRootState extends State<CCRootPage>
         _user = user.uid.toString();
       });
     });
-
     setState(() {
-      _authStatus = AuthStatus.LOGGED_IN; 
+      _authStatus = AuthStatus.NOT_DETERMINED; 
     });
+
+    Firestore.instance.collection("userinfo").document(_user).get().then((value) 
+    {
+      if (value.exists)
+      {
+        if (value["AcctCreated"])
+        {
+          setState(() {
+            _authStatus = AuthStatus.LOGGED_IN; 
+          });
+        } 
+      }
+    });
+
     print("User logged in");
     
   }

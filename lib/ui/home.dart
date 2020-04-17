@@ -2,6 +2,9 @@ import "package:flutter/material.dart";
 import 'package:crossing_companion/ui/root.dart';
 import 'package:crossing_companion/utils/kev_utils.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:path/path.dart' as Path;  
 
 enum CurrentPage {
   Turnip,
@@ -315,71 +318,76 @@ class _CCHomePageState extends State<CCHomePage> {
 
   Widget profileSettingsView(double sWidth, double sHeight)
   {
-    return Center(
-      child: AnimatedContainer(
-        duration: Duration(milliseconds: 250),
-        width: tweakingProfSettings ? sWidth - sWidth / 10 : 0,
-        height: tweakingProfSettings ? (sHeight - (sHeight / 8)) - (sHeight - (sHeight / 8)) / 10 : 0,
-        child: Card (
-          color: kevGrey,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              Padding(padding: EdgeInsets.only(top: 0),),
-              Stack(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(top: 16),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text("Profile settings", style: TextStyle(fontSize: 40, color: kevWhiteTextCol, fontFamily: "Fink"), softWrap: false, textAlign: TextAlign.center,),
-                      ],
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        IconButton(icon: Icon(Icons.close), iconSize: sHeight / 20, onPressed: () {setState((){tweakingProfSettings = false;});}),
-                    ],),
-                  )
-                ],
-              ),
-              Padding(
-                padding: EdgeInsets.fromLTRB(sHeight / 10, 0, sHeight / 10, 16),
-                child: DecoratedBox(decoration: BoxDecoration(color: kevWhiteTextCol), child: Container( height: 3,),),
-              ),
-              SingleChildScrollView(
-                child: Column(children: [
-                  Padding(
-                    padding: EdgeInsets.fromLTRB(sHeight / 10, 32, sHeight / 10, 0),
-                    child: FlatButton(
-                      color: Colors.black,
-                      onPressed: () {
-                        
-                      },
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(60)),
-                      child: Row(
+    double iWidth = sWidth - sWidth / 10;
+    double iHeight = (sHeight - (sHeight / 8)) - (sHeight - (sHeight / 8)) / 10;
+    double aspectRatio = iWidth / iHeight;
+
+    return Container(
+      child: Center(
+        child: AnimatedContainer(
+          duration: Duration(milliseconds: 250),
+          width: tweakingProfSettings ? iWidth : 0,
+          height: tweakingProfSettings ? iHeight : 0,
+          child: Card (
+            color: kevGrey,
+            child: ListView(
+              shrinkWrap: true,
+              // mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Stack(
+                  children: [
+                      Row(
                         mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          Text("Change password", style: TextStyle(fontSize: 28, color: kevWhiteTextCol, fontFamily: "Fink"), softWrap: false, textAlign: TextAlign.center,),
-                          Spacer(),
-                          Icon(Icons.arrow_drop_down, color: kevWhiteTextCol,),
+                        children: [
+                          Text("Profile Settings", style: TextStyle(fontSize: 40, color: kevWhiteTextCol, fontFamily: "Fink"), softWrap: false, textAlign: TextAlign.center,),
                         ],
                       ),
-                    ),
-                  )
-                ],
+                  ],
                 ),
-              ),
-            ]
+                Padding(
+                  padding: EdgeInsets.fromLTRB(sHeight / 10, 0, sHeight / 10, 16),
+                  child: DecoratedBox(decoration: BoxDecoration(color: kevWhiteTextCol), child: Container( height: 3,),),
+                ),
+                SingleChildScrollView(
+                  scrollDirection: Axis.vertical,
+                    child: Column(
+                      children: [
+                        aspectRatio < 1 ? Column (
+                          children: [
+                            // profilePictureSelector(),
+                          ],
+                        ) : Row(
+                          children: [
+                            Spacer(),
+                            // profilePictureSelector(),
+                            Spacer(),
+                          ],
+                        )
+                      ],
+                    ),
+                ),
+              ]
+            ),
           ),
         ),
       ),
     );
   }
+
+
+  Future<String> getFirebaseStorageURL(StorageReference ref) async
+ {
+   if (!tweakingProfSettings) return "";
+   try
+   {
+     return await ref.getDownloadURL();
+   }
+   catch(e)
+   {
+    print("User does not yet have acces to firebase");
+   }
+   return "";
+ }
 
   Widget homeNavBar(double sHeight, double sWidth)
   {

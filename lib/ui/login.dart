@@ -10,6 +10,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:path/path.dart' as Path;  
+import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_recaptcha_v2/flutter_recaptcha_v2.dart';
 
 import 'package:crossing_companion/utils/kev_utils.dart';
 import 'root.dart';
@@ -30,6 +32,8 @@ class CCLoginPage extends StatefulWidget
 
 class CCLoginState extends State<CCLoginPage> with TickerProviderStateMixin
 {
+  RecaptchaV2Controller recaptchaV2Controller = RecaptchaV2Controller();
+
   final databaseReference = Firestore.instance;
   bool tweakingProfSettings = false;
 
@@ -37,6 +41,7 @@ class CCLoginState extends State<CCLoginPage> with TickerProviderStateMixin
   String password = "";
   String passVerf = "";
   String username = "";
+  String userId = "";
   bool signingUp;
 
   MaterialColor kevWhiteTextCol = KevColor.getMatColor(0xFFAAAAAA);
@@ -59,7 +64,13 @@ class CCLoginState extends State<CCLoginPage> with TickerProviderStateMixin
 
   bool usingStockImage = true;
   String profPicURL = "";
-  File userProfilePic;
+  File userProfilePic = File("");
+
+  
+  bool termsAccepted = false;
+  bool ageCorrect = false;
+  bool northOrSouth = false;
+  bool recaptchaGood = false;
 
   double buttonPad = 60;
   double errorWidth = 0;
@@ -91,6 +102,7 @@ class CCLoginState extends State<CCLoginPage> with TickerProviderStateMixin
 
   @override void initState() {
     signingUp = false;
+    recaptchaV2Controller.show();
     KeyboardVisibilityNotification().addNewListener(
       onChange: (bool visible) {
           keyboardVisable = visible;
@@ -121,10 +133,13 @@ class CCLoginState extends State<CCLoginPage> with TickerProviderStateMixin
     passVerfFocus.dispose();
     usernameFocus.dispose();
   }
+
+
   @override
   Widget build(BuildContext context) {
     double sHeight = MediaQuery.of(context).size.height;
     double sWidth = MediaQuery.of(context).size.width;
+    double aspectRatio = sWidth / sHeight;
 
     double statusBarHeight = MediaQuery.of(context).padding.top;
     return Scaffold(
@@ -141,137 +156,26 @@ class CCLoginState extends State<CCLoginPage> with TickerProviderStateMixin
                 colorBlendMode: BlendMode.darken,
               ),
               Container(
-                child: Column(
+                child: aspectRatio >= 1 ? Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: <Widget>[
                     Container(padding: EdgeInsets.only(top: statusBarHeight),),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(0.0, 12.0, 0.0, 12.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: <Widget>[
-                          Icon(
-                            Icons.info,
-                            color: swatchColor,
-                            size: 32,
-                            semanticLabel: "App information",
-                          )
-                        ],
-                      ),
-                    ),
-                    Padding(
-                      child: Image(
-                        image: AssetImage("assets/images/LoginBanner.png"),
-                        fit: BoxFit.contain,
-                      ),
-                      padding: EdgeInsets.fromLTRB(30, 0, 30, 20),
-                    ),
-                    loginForm(),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        Spacer(flex: 2),
-                        RaisedButton(
-                          textTheme: ButtonTextTheme.normal,
-                          color: swatchColor,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(45.0),
-                            side: BorderSide(color: swatchColor),
-                          ), 
-                          child: Text("Create an account", style: TextStyle(color: Colors.black54, fontSize: 18),), 
-                          onPressed: () 
-                          {
-                            _createAccount();
-                          },
-                        ),
-                        Spacer(),
-                        RaisedButton(
-                          textTheme: ButtonTextTheme.normal,
-                          color: swatchColor,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(45.0),
-                            side: BorderSide(color: swatchColor),
-                          ), 
-                          child: Text("Log in with email", style: TextStyle(color: Colors.black54, fontSize: 18),), 
-                          onPressed: () 
-                          {
-                            _login();
-                          },
-                        ),
-                        Spacer(flex: 2),
+                    Column(
+                      children: [
+                        bodyBannerBlock(sHeight / 2, sWidth / 2),
+                        bodyInputButtons(sHeight - sHeight / 2, sWidth / 2),
                       ],
                     ),
-                    Spacer(flex: 2),
-                    Container(
-                      width: 240,
-                      child: Container(
-                        constraints: BoxConstraints(
-                          maxHeight: 70,
-                        ),
-                        child: FlatButton(
-                          color:  Colors.black54,
-                          shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(45.0),
-                                side: BorderSide(
-                                  color: Colors.black54,
-                                ),
-                          ), 
-                          child: Row (
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: <Widget>[
-                              Text("Sign In with Google", style: TextStyle(color: Colors.white70, fontSize: 16)),
-                              Spacer(),
-                              Container(
-                                padding: EdgeInsets.fromLTRB(0, 12, 0, 12),
-                                child: Image(
-                                  image: AssetImage("assets/images/GoogleLogo.png"),
-                                  fit: BoxFit.contain),
-                              ),
-                            ],
-                          ), onPressed: () 
-                          {
-                            widget.auth.googleSignIn().whenComplete(()
-                              {
-                                print("Signed in with google\n");
-                              }
-                            );
-                          },
-                        ),
-                      ),
-                    ),
-                    Spacer(flex: 2),
-                    FlatButton(
-                          textTheme: ButtonTextTheme.normal,
-                          child: Text("Forgot password", style: TextStyle(color: Colors.white)), 
-                          onPressed: () async
-                          {
-                            if (_emailKey.currentState.validate())
-                            {
-                              widget.auth.resetPassword(email);
-                              alertMessage("You have been sent a password reset email\nif you have an account");
-                              setState(() {
-                                errorPopupVisible = true;
-                              });
-                              startPopupTimer();
-                            }
-                            else
-                            {
-                              if (creatingAccount)
-                              {
-                                errorText = "Please enter an email!";
-                                setState(() {
-                                  buttonPad = creatingAccount ? 60 : 0;
-                                  userButtonHeight = 0;
-                                  creatingAccount = false;
-                                  errorPopupVisible = true;
-                                });
-                                startPopupTimer();
-                                return;
-                              }
-                            }
-                            
-                          },
-                        ),
+                    loginForm(sHeight, sWidth / 2),
+                  ],
+                ) :
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: <Widget>[
+                    Container(padding: EdgeInsets.only(top: statusBarHeight),),
+                    bodyBannerBlock(sHeight / 2, sWidth / 2),
+                    loginForm(sWidth, creatingAccount ? sHeight / 2.2 : sHeight / 4),
+                    bodyInputButtons(sHeight - sHeight / 1.3, sWidth),
                   ],
                 ),
               ),
@@ -280,6 +184,156 @@ class CCLoginState extends State<CCLoginPage> with TickerProviderStateMixin
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  
+  Widget bodyBannerBlock(double sHeight, double sWidth)
+  {
+    //Part 1 of 2, vert -> hori split
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Padding(
+          child: Image(
+            image: AssetImage("assets/images/LoginBanner.png"),
+            fit: BoxFit.contain,
+            width: sHeight,
+          ),
+          padding: EdgeInsets.fromLTRB(30, 32, 30, 20),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(0.0, 12.0, 0.0, 12.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: <Widget>[
+              Icon(
+                Icons.info,
+                color: swatchColor,
+                size: 32,
+                semanticLabel: "App information",
+              )
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget bodyInputButtons(double sHeight, double sWidth)
+  {
+    return Container(
+      width: sWidth,
+      height: sHeight,
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Spacer(flex: 2),
+              RaisedButton(
+                textTheme: ButtonTextTheme.normal,
+                color: swatchColor,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(45.0),
+                  side: BorderSide(color: swatchColor),
+                ), 
+                child: Text("Create an account", style: TextStyle(color: Colors.black54, fontSize: 18),), 
+                onPressed: () 
+                {
+                  _createAccount();
+                },
+              ),
+              Spacer(),
+              RaisedButton(
+                textTheme: ButtonTextTheme.normal,
+                color: swatchColor,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(45.0),
+                  side: BorderSide(color: swatchColor),
+                ), 
+                child: Text("Log in with email", style: TextStyle(color: Colors.black54, fontSize: 18),), 
+                onPressed: () 
+                {
+                  _login();
+                },
+              ),
+              Spacer(flex: 2),
+            ],
+          ),
+          Spacer(flex: 2),
+          Container(
+            width: 240,
+            child: Container(
+              constraints: BoxConstraints(
+                maxHeight: 70,
+              ),
+              child: FlatButton(
+                color:  Colors.black54,
+                shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(45.0),
+                      side: BorderSide(
+                        color: Colors.black54,
+                      ),
+                ), 
+                child: Row (
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: <Widget>[
+                    Text("Sign In with Google", style: TextStyle(color: Colors.white70, fontSize: 16)),
+                    Spacer(),
+                    Container(
+                      padding: EdgeInsets.fromLTRB(0, 12, 0, 12),
+                      child: Image(
+                        image: AssetImage("assets/images/GoogleLogo.png"),
+                        fit: BoxFit.contain),
+                    ),
+                  ],
+                ), onPressed: () 
+                {
+                  widget.auth.googleSignIn().whenComplete(()
+                    {
+                      print("Signed in with google\n");
+                    }
+                  );
+                },
+              ),
+            ),
+          ),
+          Spacer(flex: 2),
+          FlatButton(
+                textTheme: ButtonTextTheme.normal,
+                child: Text("Forgot password", style: TextStyle(color: Colors.white)), 
+                onPressed: () async
+                {
+                  if (_emailKey.currentState.validate())
+                  {
+                    widget.auth.resetPassword(email);
+                    alertMessage("You have been sent a password reset email\nif you have an account");
+                    setState(() {
+                      errorPopupVisible = true;
+                    });
+                    startPopupTimer();
+                  }
+                  else
+                  {
+                    if (creatingAccount)
+                    {
+                      errorText = "Please enter an email!";
+                      setState(() {
+                        buttonPad = creatingAccount ? 60 : 0;
+                        userButtonHeight = 0;
+                        creatingAccount = false;
+                        errorPopupVisible = true;
+                      });
+                      startPopupTimer();
+                      return;
+                    }
+                  }
+                  
+            },
+          ),
+        ],
       ),
     );
   }
@@ -379,7 +433,6 @@ class CCLoginState extends State<CCLoginPage> with TickerProviderStateMixin
 
 
   void submitFirebaseCredentials() async {
-  String userId = "";
   bool finishedSignUp = false;
   try {
     if (!signingUp) {
@@ -502,81 +555,75 @@ class CCLoginState extends State<CCLoginPage> with TickerProviderStateMixin
 
   Widget profileSettingsView(double sWidth, double sHeight)
   {
-    return Center(
-      child: AnimatedContainer(
-        duration: Duration(milliseconds: 250),
-        width: tweakingProfSettings ? sWidth - sWidth / 10 : 0,
-        height: tweakingProfSettings ? (sHeight - (sHeight / 8)) - (sHeight - (sHeight / 8)) / 10 : 0,
-        child: Card (
-          color: kevGrey,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              Padding(padding: EdgeInsets.only(top: 0),),
-              Stack(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(top: 16),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text("New Account", style: TextStyle(fontSize: 40, color: kevWhiteTextCol, fontFamily: "Fink"), softWrap: false, textAlign: TextAlign.center,),
-                      ],
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        IconButton(icon: Icon(Icons.close), iconSize: sHeight / 20, onPressed: () {setState((){tweakingProfSettings = false;});}),
-                    ],),
-                  )
-                ],
-              ),
-              Padding(
-                padding: EdgeInsets.fromLTRB(sHeight / 10, 0, sHeight / 10, 16),
-                child: DecoratedBox(decoration: BoxDecoration(color: kevWhiteTextCol), child: Container( height: 3,),),
-              ),
-              SingleChildScrollView(
-                child: Column(children: [
-                  Text("Profile Picture", style: TextStyle(fontSize: 32, color: kevWhiteTextCol, fontFamily: "Fink"), softWrap: false, textAlign: TextAlign.center,),
-                  profilePictureSelector(),
-                  Padding(
-                    padding: EdgeInsets.fromLTRB(sHeight / 10, 32, sHeight / 10, 0),
-                    child: FlatButton(
-                      color: Colors.black,
-                      onPressed: () {
-                        
-                      },
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(60)),
-                      child: Row(
+    double iWidth = sWidth - sWidth / 10;
+    double iHeight = (sHeight - (sHeight / 8)) - (sHeight - (sHeight / 8)) / 10;
+    double aspectRatio = iWidth / iHeight;
+
+    return Container(
+      child: Center(
+        child: AnimatedContainer(
+          duration: Duration(milliseconds: 250),
+          width: tweakingProfSettings ? iWidth : 0,
+          height: tweakingProfSettings ? iHeight : 0,
+          child: Card (
+            color: kevGrey,
+            child: ListView(
+              shrinkWrap: true,
+              // mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                Stack(
+                  children: [
+                      Row(
                         mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          Text("Change password", style: TextStyle(fontSize: 28, color: kevWhiteTextCol, fontFamily: "Fink"), softWrap: false, textAlign: TextAlign.center,),
-                          Spacer(),
-                          Icon(Icons.arrow_drop_down, color: kevWhiteTextCol,),
+                        children: [
+                          Text("New Account", style: TextStyle(fontSize: 40, color: kevWhiteTextCol, fontFamily: "Fink"), softWrap: false, textAlign: TextAlign.center,),
                         ],
                       ),
-                    ),
-                  ),
-
-
-                ],
+                  ],
                 ),
-              ),
-            ]
+                Padding(
+                  padding: EdgeInsets.fromLTRB(sHeight / 10, 0, sHeight / 10, 16),
+                  child: DecoratedBox(decoration: BoxDecoration(color: kevWhiteTextCol), child: Container( height: 3,),),
+                ),
+                SingleChildScrollView(
+                  scrollDirection: Axis.vertical,
+                    child: Column(
+                      children: [
+                        aspectRatio < 1 ? Column (
+                          children: [
+                            profilePictureSelector(),
+                            termAcceptButtons(sHeight, sWidth),
+                            signUpLogin(),
+                          ],
+                        ) : Row(
+                          children: [
+                            Spacer(),
+                            profilePictureSelector(),
+                            Spacer(),
+                            termAcceptButtons(sHeight, sWidth),
+                            Spacer(),
+                            signUpLogin(),
+                            Spacer(),
+                          ],
+                        )
+                      ],
+                    ),
+                ),
+              ]
+            ),
           ),
         ),
       ),
     );
   }
   
-  Widget loginForm()
+  Widget loginForm(double sWidth, double sHeight)
   {
     return AnimatedContainer(
+      width: sWidth,
+      height: sHeight,
       duration: Duration(milliseconds: 500),
-      padding: EdgeInsets.only(top: buttonPad),
+      padding: EdgeInsets.only(top: 32),
       child: Container(
         child: Column (crossAxisAlignment: CrossAxisAlignment.center, children: <Widget>[
           
@@ -815,41 +862,64 @@ class CCLoginState extends State<CCLoginPage> with TickerProviderStateMixin
       });
     });
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-          Container(height: 200,),
-          GestureDetector(
-            onTap: () {
-              setState(() {
-                usingStockImage = false;
-                chooseFile();
-              });
-            },
-            child: Container(
-              height: 200,
-              child: Card(
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
-                child: usingStockImage ? profPicURL != "" ? Image.network(profPicURL) : Container() : Image.asset(userProfilePic.path == null ? "" : userProfilePic.path),
-              ),
-            ),
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        children: <Widget>[
+          Column(
+            children: [
+              Text("Profile Picture", style: TextStyle(fontSize: 32, color: kevWhiteTextCol, fontFamily: "Fink"), softWrap: false, textAlign: TextAlign.center,),
+              Padding(padding: EdgeInsets.symmetric(vertical: 8),),
+            ]
           ),
-      ],
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+                Container(height: 200,),
+                GestureDetector(
+                  onTap: () {
+                    chooseFile();
+                  },
+                  child: Container(
+                    height: 200,
+                    width: 200,
+                    child: ClipRRect( 
+                        child: usingStockImage ? (profPicURL != "" ? Image.network(profPicURL) : Container()) : Image.file(userProfilePic == null ? "" : userProfilePic),
+                        borderRadius: BorderRadius.circular(180),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
   Future chooseFile() async {    
-   await ImagePicker.pickImage(source: ImageSource.gallery).then((image) {    
-     setState(() {    
-       userProfilePic = image;    
-       print("oops");
-       print(image.path);
-     });    
-   });    
+    try{
+      await ImagePicker.pickImage(source: ImageSource.gallery).then((image) {    
+        if (image == null) { return; }
+
+        setState(() { 
+          userProfilePic = image;
+          usingStockImage = false;
+        });    
+      });    
+    }
+    catch(e)
+    {
+      print("EEEE");
+      setState(() {
+        usingStockImage = true;
+        print("Prof pic URL: $profPicURL");
+      });
+    }
  } 
 
  Future<String> getFirebaseStorageURL(StorageReference ref) async
  {
+   if (!tweakingProfSettings) return "";
    try
    {
      return await ref.getDownloadURL();
@@ -859,5 +929,190 @@ class CCLoginState extends State<CCLoginPage> with TickerProviderStateMixin
     print("User does not yet have acces to firebase");
    }
    return "";
+ }
+
+ Widget termAcceptButtons(double sHeight, double sWidth)
+ {
+    double iWidth = sWidth - sWidth / 10;
+    double iHeight = (sHeight - (sHeight / 8)) - (sHeight - (sHeight / 8)) / 10;
+    double aspectRatio = iWidth / iHeight;
+
+   return Container(
+      constraints: BoxConstraints(maxHeight: aspectRatio < 1 ? iHeight / 2 : iHeight - iHeight / 10, maxWidth: double.maxFinite,),
+      child: Column(
+        children: <Widget>[
+          Spacer(),
+          Text("Fields marked with a * are required!", textAlign: TextAlign.center, style: TextStyle(color: kevWhiteTextCol, fontFamily: "Fink"),),
+          Spacer(),
+          Container(
+            width: 300,
+            height: 100,
+            child: Stack(
+              fit:StackFit.expand,
+              children: [
+                Container(
+                  child: DecoratedBox(decoration: BoxDecoration(color: Colors.black, borderRadius: BorderRadius.circular(45))),
+                ),
+                
+                Row(
+                  children: <Widget>[
+                    Spacer(),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Spacer(),
+                        Text("Do you agree to the", style: TextStyle(color: kevWhiteTextCol, fontFamily: "Fink", fontSize: 26), textAlign: TextAlign.left,),
+                        InkWell(
+                            child: Text("Terms and Conditions? *", style: TextStyle(color: Colors.blue, fontFamily: "Fink", fontSize: 24, fontStyle: FontStyle.italic), textAlign: TextAlign.left,),
+                            onTap: () => launch('https://crossingcompanion.web.app/terms-of-use/index.html')
+                        ),
+                        Spacer(),
+                      ],
+                    ),
+                    Spacer(),
+                    Column(
+                      children: [
+                        Spacer(),
+                        Theme(
+                          data: ThemeData(unselectedWidgetColor: kevWhiteTextCol),
+                          child: Checkbox(
+                            hoverColor: Colors.white,
+
+                            activeColor: kevWhiteTextCol,
+                            value: termsAccepted,
+                            onChanged: (value) {
+                              setState(() {
+                                termsAccepted = !termsAccepted;
+                              });
+                            },
+                          ),
+                        ),
+                        Spacer(),
+                      ],
+                    ),
+                    Spacer(),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          Spacer(),
+          Container(
+            width: 300,
+            height: 100,
+            child: Stack(
+              fit:StackFit.expand,
+              children: [
+                Container(
+                  child: DecoratedBox(decoration: BoxDecoration(color: Colors.black, borderRadius: BorderRadius.circular(45))),
+                ),
+                
+                Row(
+                  children: <Widget>[
+                    Spacer(),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Spacer(),
+                        Text("Are you 13 or older? *", style: TextStyle(color: kevWhiteTextCol, fontFamily: "Fink", fontSize: 26), textAlign: TextAlign.left,),
+                        
+                        Spacer(),
+                      ],
+                    ),
+                    Spacer(),
+                    Column(
+                      children: [
+                        Spacer(),
+                        Theme(
+                          data: ThemeData(unselectedWidgetColor: kevWhiteTextCol),
+                          child: Checkbox(
+                            hoverColor: Colors.white,
+
+                            activeColor: kevWhiteTextCol,
+                            value: ageCorrect,
+                            onChanged: (value) {
+                              setState(() {
+                                ageCorrect = !ageCorrect;
+                              });
+                            },
+                          ),
+                        ),
+                        Spacer(),
+                      ],
+                    ),
+                    Spacer(),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          Spacer(),
+        ],
+      )
+    );
+  }
+
+  Widget signUpLogin()
+  {
+    return Container(
+      width: 300,
+      height: 50,
+      child: GestureDetector(
+        onTap: () {
+          if (ageCorrect && termsAccepted)
+          {
+            if (userProfilePic != null)
+            {
+              Firestore.instance.collection("userinfo").document(userId).setData({"AcctCreated": true}, merge: true);
+              uploadFile("$userId/ProfilePic/", userProfilePic);
+              
+              submitFirebaseCredentials();
+              widget.loginCallback();
+            }
+            else{
+              Firestore.instance.collection("userinfo").document(userId).setData({"AcctCreated": true, "UsingStockPhoto": true}, merge: true);
+              
+              submitFirebaseCredentials();
+              widget.loginCallback();
+            }
+          }
+          else{
+            alertMessage("Please accept the \nterms and verify age!");
+          }
+        },
+        child: Stack(
+          fit:StackFit.expand,
+          children: [
+            Container(
+              child: DecoratedBox(decoration: BoxDecoration(color: Colors.black, borderRadius: BorderRadius.circular(45))),
+            ),
+            
+            Row(
+              children: <Widget>[
+                Spacer(),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Spacer(),
+                    Text("Signup and Log in", style: TextStyle(color: Colors.blue, fontFamily: "Fink", fontSize: 26), textAlign: TextAlign.center,),
+                    Spacer(),
+                  ],
+                ),
+                Spacer(),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future uploadFile(String path, File file) async {    
+   StorageReference storageReference = FirebaseStorage.instance    
+       .ref()    
+       .child('$path/${Path.basename(file.path)}');    
+   StorageUploadTask uploadTask = storageReference.putFile(file);    
+   await uploadTask.onComplete;    
+   print('File Uploaded');
  }
 }
