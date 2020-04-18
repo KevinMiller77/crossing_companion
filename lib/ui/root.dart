@@ -4,6 +4,7 @@ import 'package:crossing_companion/ui/home.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:flutter/services.dart';
 
 enum AuthStatus
 {
@@ -35,6 +36,7 @@ class CCRootState extends State<CCRootPage>
   void initState()
   {
     super.initState();
+    SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
     widget.auth.getCurrentUser().then( (user) {
       setState(() {
         if (user != null)
@@ -74,18 +76,25 @@ class CCRootState extends State<CCRootPage>
       _authStatus = AuthStatus.NOT_DETERMINED; 
     });
 
-    Firestore.instance.collection("userinfo").document(_user).get().then((value) 
+    try
     {
-      if (value.exists)
+      Firestore.instance.collection("userinfo").document(_user).get().then((value) 
       {
-        if (value["AcctCreated"])
+        if (value.exists)
         {
-          setState(() {
-            _authStatus = AuthStatus.LOGGED_IN; 
-          });
-        } 
-      }
-    });
+          if (value["AcctCreated"])
+          {
+            setState(() {
+              _authStatus = AuthStatus.LOGGED_IN; 
+            });
+          } 
+        }
+      });
+    }
+    catch(e)
+    {
+      
+    }
 
     print("User logged in");
     
